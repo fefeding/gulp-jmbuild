@@ -1,0 +1,1 @@
+define("b",["./a"],function(n,i,a){var f=n("./a");i.init=function(){f.run("b")}});

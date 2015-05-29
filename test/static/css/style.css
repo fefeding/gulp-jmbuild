@@ -1,0 +1,34 @@
+
+/*===========================
+文件名  ：style.css
+作  者  ：richiepu(普伟)   
+修改人  ：richiepu(普伟)
+创建时间：2014-11-25 
+修改时间：2014-11-25
+版  本  ：v1.0
+说  明  ：手游吧PC论坛样式
+===========================*/ 
+
+/* 使命召唤吧皮肤样式 */
+.skin-smzh .gb-cont-bg,.skin-50721 .gb-cont-bg{background:#4A688A url(../img/gico-l.png) no-repeat 50% 0;}
+.skin-smzh .gb-bbs-banner img,.skin-50721 .gb-bbs-banner img{display: none;}
+.skin-smzh .gb-footer,.skin-50721 .gb-footer{background: #192334;}
+.skin-smzh .gb-frs li,.skin-50721 .gb-frs li{color: #91969F;} 
+.skin-smzh .gb-frs li a,.skin-50721 .gb-frs li a{color: #91969F;}
+.skin-smzh .gb-frs ul,.skin-50721 .gb-frs ul{border-bottom-color: #2A394B;}
+.skin-smzh .gb-ad-b span,.skin-50721 .gb-ad-b span{border:5px solid #FFF;}
+.skin-smzh .gb-ad-b strong,.skin-50721 .gb-ad-b strong{color: #FFF;}
+.skin-smzh .gb-ad-b em,.skin-50721 .gb-ad-b em{color: #91969F;} 
+.skin-smzh .gb-text-c,.skin-50721 .gb-text-c{color: #66696E;}
+.skin-smzh .gb-footer-link,.skin-50721 .gb-footer-link,.skin-smzh .gb-footer-link a,.skin-50721 .gb-footer-link a{color: #91969F;} 
+.skin-smzh .gb-s-tips,.skin-50721 .gb-s-tips{color: #BED1E2;margin: 0;padding: 3px 0 0 15px;}
+.skin-smzh .gb-bbs-new,.skin-50721 .gb-bbs-new{margin-top: 0} 
+
+.gb-bbs-user-define{width: 500px;margin-left: -250px;top: 220px;}
+.adm-search table{margin: 0 auto;} 
+.gb-dialog-from{padding: 20px;}
+.gb-d-label{padding: 5px 0;}
+.gb-frm-tips{color: #999;}
+.gb-frm-pl{padding: 0 0 0 60px;}
+
+.grid-list-wrap .grid-list{width: 100%;}

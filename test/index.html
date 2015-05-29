@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1.0, maximum-scale=1, user-scalable=no"/>
+<script>
+	function __cmdinline(){}
+	function __pkg(){}
+
+	__pkg('/static/js/a.js', 'test/t.js');
+</script>
+<style>
+	__inline('/static/css/style.css')
+</style>
+</head>
+<body>
+</body>
+<script src="http://gqq.gtimg.com/static/mobile/js/v3/pkg/sea.js"></script>
+<script>
+	
+var cssUrl = __uri('static/css/style.css');
+
+	seajs.config({
+	  base: "./static/js",
+	  alias: {
+	  }
+	});
+	
+	__cmdinline('test/t.js', 'a.js');
+	
+	seajs.use('test/c',function(p) {
+		p.init();
+	});
+</script>
+</html>
