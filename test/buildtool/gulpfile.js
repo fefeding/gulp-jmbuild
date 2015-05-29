@@ -1,18 +1,12 @@
 
 console.log('start build');
+
 var jshint = require('gulp-jshint');
 var Q = require('q');
-//var workerFarm = require('worker-farm');
 var gulp = require('gulp');
-//var transport = require("gulp-seajs-transport");
-//var transport = require('gulp-transport');
-
-
 var path = require('path');
+var jmbuild = require('../../index.js');
 
-var transport = require('../../index.js');
-
-console.log('require transport');
 //配置文件
 var config = {
     "root": path.resolve('../'),   
@@ -56,9 +50,6 @@ var config = {
     ]
 };
 
-//清空构建记录
-transport.clearInfo();
-
 //语法检测
 gulp.task('jshint', function () { 
     var sources = [];
@@ -85,7 +76,7 @@ gulp.task('jshint', function () {
 
 
 //压缩JS
-var jstasks = transport.createJSTask(gulp, config, ['jshint']);
+var jstasks = jmbuild.createJSTask(gulp, config, ['jshint']);
 gulp.task('minifyJS', jstasks,function (){
     console.log('minifyJS-start');
     var deferred = Q.defer();
@@ -94,7 +85,7 @@ gulp.task('minifyJS', jstasks,function (){
 });
 
 //一般文件处理
-var filetasks = transport.createFILETask(gulp, config, []);
+var filetasks = jmbuild.createFILETask(gulp, config, []);
 gulp.task('cpFile', filetasks,function (){
     console.log('cpFile-start');
     var deferred = Q.defer();
@@ -103,7 +94,7 @@ gulp.task('cpFile', filetasks,function (){
 });
 
 //压缩css
-var csstasks = transport.createCSSTask(gulp, config, ['cpFile']);
+var csstasks = jmbuild.createCSSTask(gulp, config, ['cpFile']);
 gulp.task('minifyCSS', csstasks,function (){
     console.log('minifyCSS-start');
     var deferred = Q.defer();
@@ -114,7 +105,7 @@ gulp.task('minifyCSS', csstasks,function (){
 
 
 //html解析主任务
-var htmlTasks = transport.createHTMLTask(gulp, config, ['minifyJS', 'minifyCSS']);
+var htmlTasks = jmbuild.createHTMLTask(gulp, config, ['minifyJS', 'minifyCSS']);
 gulp.task('parseHTML', htmlTasks, function (){
     var deferred = Q.defer();
     deferred.resolve();
@@ -123,7 +114,7 @@ gulp.task('parseHTML', htmlTasks, function (){
 
 //监听
 //gulp.task('watch', function () {
- //   gulp.watch(sources, tasks);
+ //   gulp.watch(sources, ['jshint','minifyJS', 'cpFile', 'minifyCSS','parseHTML']);
 //});
 
 gulp.task('default', ['jshint','minifyJS', 'cpFile', 'minifyCSS','parseHTML']);

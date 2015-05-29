@@ -1,6 +1,6 @@
 {
   "name": "gulp-jmbuild",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "前端构建工具",
   "author": {
     "name": "jiamao",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "cmd-util": "^0.3.13",
+    "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
     "gulp-minify-css": "^1.1.1",
     "gulp-rename": "^1.2.2",
