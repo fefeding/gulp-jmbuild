@@ -1,0 +1,91 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'publish' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.33
+4 verbose node symlink C:\Program Files\nodejs\\node.exe
+5 verbose publish [ '.' ]
+6 verbose cache add [ '.', null ]
+7 verbose cache add name=undefined spec="." args=[".",null]
+8 verbose parsed url { protocol: null,
+8 verbose parsed url   slashes: null,
+8 verbose parsed url   auth: null,
+8 verbose parsed url   host: null,
+8 verbose parsed url   port: null,
+8 verbose parsed url   hostname: null,
+8 verbose parsed url   hash: null,
+8 verbose parsed url   search: null,
+8 verbose parsed url   query: null,
+8 verbose parsed url   pathname: '.',
+8 verbose parsed url   path: '.',
+8 verbose parsed url   href: '.' }
+9 silly lockFile 3a52ce78- .
+10 verbose lock . C:\Users\fefeding\AppData\Roaming\npm-cache\3a52ce78-.lock
+11 verbose tar pack [ 'C:\\Users\\fefeding\\AppData\\Roaming\\npm-cache\\gulp-jmbuild\\0.1.15\\package.tgz',
+11 verbose tar pack   '.' ]
+12 verbose tarball C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package.tgz
+13 verbose folder .
+14 info prepublish gulp-jmbuild@0.1.15
+15 silly lockFile 1f1177db-tar tar://.
+16 verbose lock tar://. C:\Users\fefeding\AppData\Roaming\npm-cache\1f1177db-tar.lock
+17 silly lockFile d8730f91--gulp-jmbuild-0-1-15-package-tgz tar://C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package.tgz
+18 verbose lock tar://C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package.tgz C:\Users\fefeding\AppData\Roaming\npm-cache\d8730f91--gulp-jmbuild-0-1-15-package-tgz.lock
+19 silly lockFile 1f1177db-tar tar://.
+20 silly lockFile 1f1177db-tar tar://.
+21 silly lockFile d8730f91--gulp-jmbuild-0-1-15-package-tgz tar://C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package.tgz
+22 silly lockFile d8730f91--gulp-jmbuild-0-1-15-package-tgz tar://C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package.tgz
+23 silly lockFile db6fc1c6-ache-gulp-jmbuild-0-1-15-package C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package
+24 verbose lock C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package C:\Users\fefeding\AppData\Roaming\npm-cache\db6fc1c6-ache-gulp-jmbuild-0-1-15-package.lock
+25 silly lockFile db6fc1c6-ache-gulp-jmbuild-0-1-15-package C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package
+26 silly lockFile db6fc1c6-ache-gulp-jmbuild-0-1-15-package C:\Users\fefeding\AppData\Roaming\npm-cache\gulp-jmbuild\0.1.15\package
+27 silly lockFile 3a52ce78- .
+28 silly lockFile 3a52ce78- .
+29 silly publish { name: 'gulp-jmbuild',
+29 silly publish   version: '0.1.15',
+29 silly publish   description: '前端构建工具',
+29 silly publish   author: { name: 'jiamao', email: 'haofefe@163.com' },
+29 silly publish   dependencies:
+29 silly publish    { 'cmd-util': '^0.3.13',
+29 silly publish      'gulp-concat': '^2.5.2',
+29 silly publish      'gulp-rename': '^1.2.2',
+29 silly publish      'gulp-uglify': '^1.2.0',
+29 silly publish      'gulp-util': '^3.0.4',
+29 silly publish      q: '^1.4.1',
+29 silly publish      through2: '^0.6.5',
+29 silly publish      'gulp-minify-css': '^1.1.1',
+29 silly publish      'gulp-sourcemaps': '^1.5.2' },
+29 silly publish   devDependencies:
+29 silly publish    { 'cmd-util': '^0.3.13',
+29 silly publish      'gulp-concat': '^2.5.2',
+29 silly publish      'gulp-minify-css': '^1.1.1',
+29 silly publish      'gulp-rename': '^1.2.2',
+29 silly publish      'gulp-sourcemaps': '^1.5.2',
+29 silly publish      'gulp-uglify': '^1.2.0',
+29 silly publish      'gulp-util': '^3.0.4',
+29 silly publish      q: '^1.4.1',
+29 silly publish      through2: '^0.6.5' },
+29 silly publish   repository:
+29 silly publish    { type: 'git',
+29 silly publish      url: 'https://github.com/jiamao/gulp-jmbuild.git' },
+29 silly publish   bugs: { url: 'https://github.com/jiamao/gulp-jmbuild/issues' },
+29 silly publish   keywords: [ 'cmd', 'build', 'module', 'seajs' ],
+29 silly publish   scripts: { test: 'make test' },
+29 silly publish   license: 'MIT',
+29 silly publish   main: 'index.js',
+29 silly publish   homepage: 'https://github.com/jiamao/gulp-jmbuild',
+29 silly publish   _id: 'gulp-jmbuild@0.1.15',
+29 silly publish   dist: { shasum: '', tarball: '' },
+29 silly publish   directories: {},
+29 silly publish   readme: 'ERROR: No README data found!',
+29 silly publish   _shasum: '00316be2d759cf25201733fe77571d67929f27de',
+29 silly publish   _from: '.' }
+30 error need auth auth and email required for publishing
+30 error need auth You need to authorize this machine using `npm adduser`
+31 error System Windows_NT 6.1.7601
+32 error command "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
+33 error cwd D:\微云同步盘\273389528_2\项目\javascript\gulp\gulp-jmbuild
+34 error node -v v0.10.33
+35 error npm -v 1.4.28
+36 error code ENEEDAUTH
+37 verbose exit [ 1, true ]
