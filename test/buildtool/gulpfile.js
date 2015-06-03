@@ -5,6 +5,9 @@ var jshint = require('gulp-jshint');
 var Q = require('q');
 var gulp = require('gulp');
 var path = require('path');
+var Stream = require('stream');
+
+
 var jmbuild = require('../../index.js');
 
 //配置文件
@@ -76,7 +79,11 @@ gulp.task('jshint', function () {
 
 
 //压缩JS
-var jstasks = jmbuild.createJSTask(gulp, config, ['jshint']);
+var jstasks = jmbuild.createJSTask(gulp, config, ['jshint'], function(stream){
+    return stream.pipe(startFun('js'));
+},function(stream){
+    return stream.pipe(startFun('js'));
+});
 gulp.task('minifyJS', jstasks,function (){
     console.log('minifyJS-start');
     var deferred = Q.defer();
@@ -85,7 +92,11 @@ gulp.task('minifyJS', jstasks,function (){
 });
 
 //一般文件处理
-var filetasks = jmbuild.createFILETask(gulp, config, []);
+var filetasks = jmbuild.createFILETask(gulp, config, [], function(stream){
+    return stream.pipe(startFun('file'));
+},function(stream){
+    return stream.pipe(startFun('file'));
+});
 gulp.task('cpFile', filetasks,function (){
     console.log('cpFile-start');
     var deferred = Q.defer();
@@ -94,7 +105,11 @@ gulp.task('cpFile', filetasks,function (){
 });
 
 //压缩css
-var csstasks = jmbuild.createCSSTask(gulp, config, ['cpFile']);
+var csstasks = jmbuild.createCSSTask(gulp, config, ['cpFile'], function(stream){
+    return stream.pipe(startFun('css'));
+},function(stream){
+    return stream.pipe(startFun('css'));
+});
 gulp.task('minifyCSS', csstasks,function (){
     console.log('minifyCSS-start');
     var deferred = Q.defer();
@@ -105,7 +120,11 @@ gulp.task('minifyCSS', csstasks,function (){
 
 
 //html解析主任务
-var htmlTasks = jmbuild.createHTMLTask(gulp, config, ['minifyJS', 'minifyCSS']);
+var htmlTasks = jmbuild.createHTMLTask(gulp, config, ['minifyJS', 'minifyCSS'], function(stream){
+    return stream.pipe(startFun('html'));
+},function(stream){
+    return stream.pipe(startFun('html'));
+});
 gulp.task('parseHTML', htmlTasks, function (){
     var deferred = Q.defer();
     deferred.resolve();
@@ -126,3 +145,21 @@ gulp.task('default', ['jshint','minifyJS', 'cpFile', 'minifyCSS','parseHTML']);
 //});
 
 
+//我是一个测试start
+function startFun(msg) {
+    var stream = new Stream.Transform({objectMode: true});    
+    stream._transform = function(file, unused, callback) {  
+        console.log("start Fun["+msg+"]:" + file.path);
+        callback(null, file);
+      };
+    return stream;   
+}
+//我是一个测试end
+function endFun(msg) {
+    var stream = new Stream.Transform({objectMode: true});    
+    stream._transform = function(file, unused, callback) {  
+        console.log("end Fun["+msg+"]:" + file.path);
+        callback(null, file);
+      };
+    return stream;   
+}

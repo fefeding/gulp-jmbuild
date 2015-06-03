@@ -444,12 +444,12 @@ function getCache() {
 function createMd5Path(oldpath, md5, md5Separator) {
     var ext = path.extname(oldpath);
     var basename = path.basename(oldpath, ext);
-    return path.join(path.dirname(oldpath), basename+md5Separator+md5+ext);
+    return path.join(path.dirname(oldpath), basename+md5Separator+md5+ext).replace(/\\/g,'/');
 }
 
 
 //生成js编译任务
-exports.createJSTask = function(gulp, config, depTasks) {
+exports.createJSTask = function(gulp, config, depTasks, startFun, endFun) {
     var jstasks = [];
     if(!config.js || !config.js.length) return jstasks;
     var taskIndex = 0;
@@ -465,8 +465,11 @@ exports.createJSTask = function(gulp, config, depTasks) {
                     "base": path.resolve(config.root,config.jsBase),
                     "type": 'js',
                     "config": s
-                }))
-             .pipe(uglify())
+                }));
+             if(startFun && typeof startFun == 'function') {
+                stream = startFun(stream);
+             }
+             stream.pipe(uglify())
              .pipe(gulp.dest(dest));
              
              if(s.concat) 
@@ -477,6 +480,9 @@ exports.createJSTask = function(gulp, config, depTasks) {
              if(s.md5) 
               stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
 
+            if(endFun && typeof endFun == 'function') {
+                stream = endFun(stream);
+             }
             return stream.pipe(gulp.dest(dest))
              .pipe(saveInfo(config));
         });
@@ -487,7 +493,7 @@ exports.createJSTask = function(gulp, config, depTasks) {
 }
 
 //普通文件任务
-exports.createFILETask = function(gulp, config, depTasks) {
+exports.createFILETask = function(gulp, config, depTasks, startFun, endFun) {
     var tasks = [];
     if(!config.files || !config.files.length) return tasks;
     var taskIndex = 0;
@@ -498,9 +504,11 @@ exports.createFILETask = function(gulp, config, depTasks) {
             var s = config.files[taskIndex];
             taskIndex ++;
             var dest = path.join(fileDestPath, s.dest || '');
-            var stream = gulp.src(s.source || s, {cwd:config.root})                
+            var stream = gulp.src(s.source || s, {cwd:config.root})
              .pipe(gulp.dest(dest));
-             
+             if(startFun && typeof startFun == 'function') {
+                stream = startFun(stream);
+             }
              if(s.concat) 
               stream = stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));         
              if(s.rename) 
@@ -508,7 +516,9 @@ exports.createFILETask = function(gulp, config, depTasks) {
 
              if(s.md5) 
               stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size})).pipe(gulp.dest(dest));
-
+             if(endFun && typeof endFun == 'function') {
+                stream = endFun(stream);
+             }
             return stream.pipe(saveInfo(config));
         });
 
@@ -518,7 +528,7 @@ exports.createFILETask = function(gulp, config, depTasks) {
 }
 
 //生成css构建任务
-exports.createCSSTask = function(gulp, config, depTasks) {
+exports.createCSSTask = function(gulp, config, depTasks, startFun, endFun) {
     var tasks = [];
     if(!config.css || !config.css.length) return tasks;
     var taskIndex = 0;
@@ -529,8 +539,11 @@ exports.createCSSTask = function(gulp, config, depTasks) {
             var s = config.css[taskIndex];
             taskIndex ++;
             var dest = path.join(cssDestPath, s.dest || '');
-            var stream = gulp.src(s.source || s, {cwd:config.root})  
-            .pipe(exports.parse({
+            var stream = gulp.src(s.source || s, {cwd:config.root});
+            if(startFun && typeof startFun == 'function') {
+                stream = startFun(stream);
+             }
+            stream.pipe(exports.parse({
                     "type": 'css',
                     "dest": dest,
                     "config": s
@@ -546,6 +559,9 @@ exports.createCSSTask = function(gulp, config, depTasks) {
              if(s.md5) 
               stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
 
+            if(endFun && typeof endFun == 'function') {
+                stream = endFun(stream);
+             }
             return stream.pipe(gulp.dest(dest))
              .pipe(saveInfo(config));
         });
@@ -557,7 +573,7 @@ exports.createCSSTask = function(gulp, config, depTasks) {
 
 
 //生成html解析任务
-exports.createHTMLTask = function(gulp, config, depTasks) {
+exports.createHTMLTask = function(gulp, config, depTasks, startFun, endFun) {
   var htmlTaskIndex = 0;
   var htmlTasks = [];
   var destPath = path.resolve(config.root, config.dest || '');
@@ -574,8 +590,11 @@ exports.createHTMLTask = function(gulp, config, depTasks) {
         htmlTaskIndex++;
 
         var dest = path.resolve(destPath, config.htmlDest || '', s.dest || '');
-        var stream = gulp.src(s.source || s, {cwd:config.root}) 
-         .pipe(exports.parse({
+        var stream = gulp.src(s.source || s, {cwd:config.root});
+        if(startFun && typeof startFun == 'function') {
+            stream = startFun(stream);
+         }
+         stream.pipe(exports.parse({
                 "type": 'html',
                 "root": config.root,
                 "destPath": destPath,
@@ -589,6 +608,9 @@ exports.createHTMLTask = function(gulp, config, depTasks) {
                  
          if(s.rename) {
             stream = stream.pipe(rename(s.rename));
+         }
+         if(endFun && typeof endFun == 'function') {
+            stream = endFun(stream);
          }
          return stream.pipe(gulp.dest(dest));
     });
