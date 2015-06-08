@@ -169,3 +169,58 @@ gulp.task('default', ['jshint','minifyJS', 'cpFile', 'minifyCSS','parseHTML']);
 ```js
 $ gulp
 ```
+
+
+## 用法
+
+ !!#ff0000 html构建时路径处理说明：如果以 !!#ff00ff .或/!! 开头，则它相对的是构建配置  !!#ff00ff dest !! 目录;
+如果不是，则当为 .js 就会以jsDest为路径，.css就会以cssDest配置路径来计算绝对路径。
+如果以上条件都不符合，则以当前html文件目录为当前路径来计算。!! 
+
+***1.__pkg/__uri函数
+当在html中使用__pkg('xxx')/__uri('XXX')时，构建时会被自动替换成对应文件路径，如果有配置md5会自动带上md5码(配置在config的配置中)。
+例如：
+```html
+<link rel="stylesheet" href="__uri('static/css/style.css')" />	
+<script src="__uri(static/js/a.js)"></script>
+var a=__pkg('/static/js/a.js');
+var t=__pkg('test/t.js');
+```
+构建后：
+```html
+<link rel="stylesheet" href="static/css/style.95cc4059.css" />	
+<script src="static/js/a.49ea7d65.js"></script>
+var a="/static/js/a.49ea7d65.js";
+var t="test/t.fbdd9f3d.js";
+```
+
+***2.__inline函数
+此函数为把对应的文件内容（构建后的）内联到当前html中。
+
+ !!#ff0000 注：如果当前html构建配置中有指定"includeModule": true  则当inline一个模块化js文件时，会同时把它所有依赖js一起内联进来。!! 
+
+例如：
+```html
+<style>
+	__inline('/static/css/style.css')
+</style>
+<script>
+__inline('test/t.js', 'a.js');
+</script>
+```
+构建后：
+```html
+<style>
+	body,html{margin:0;padding:0}...略
+</style>
+<script>
+define("a",[],function(n,a,i){a.run=function(){alert("i am a")}});
+define("b",["./a"],function(n,i,a){var f=n("./a");i.init=function(){f.run("b")}});
+define("test/c",["../b"],function(i,n,t){var b=i("../b");n.init=function(){b.init("b")}});
+define("test/dir/d",["../../b"],function(i,n,t){var d=i("../../b");n.init=function(){d.init("d")}});
+</script>
+```
+
+***3.css中的import语法
+
+当构建css文件时，会把@import url("./base.css?__inline");指定的文件合并到当前css中。

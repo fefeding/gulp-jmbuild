@@ -269,8 +269,8 @@ exports.parse =  function(options) {
     //替换html中的__pkg路径
     function replacePkgAndUri(content, options, buildInfo) {
         var reg = /(__pkg|__uri)\s*\(\s*([^\)]+)\s*\)/ig; 
-        return content.replace(reg, function(s, p, i){
-            var jp = RegExp.$2.trim().replace(/(^['"]*)|(['"]*$)/g, '');
+        return content.replace(reg, function(s, m, p){
+            var jp = p.trim().replace(/(^['"]*)|(['"]*$)/g, '');
             if(jp){
                 var ext = path.extname(jp);
                 var dest = {'.js':options.jsDestPath,'.css':options.cssDestPath}[ext] || options.destPath;
@@ -281,8 +281,8 @@ exports.parse =  function(options) {
                 //如果有md5则，合到路径中
                 if(buildInfo[fpath] && buildInfo[fpath].md5) {
                     s =  createMd5Path(jp, buildInfo[fpath].md5, options.md5Separator || '.');
-                    //当用的是__pkg则继续转为字符串，加引号，uri不需要
-                    if(RegExp.$1 == '__pkg') {
+                    //当用的是__pkg则继续转为字符串，加引号，uri不需要                    
+                    if(m == '__pkg') {
                         s = '"' + s + '"';
                     }
                 }
@@ -306,7 +306,7 @@ exports.parse =  function(options) {
 
     //处理内联的css
     function inlineCSS(file, content, options, buildInfo) {
-        var reg = /@import\s*url\(\s*['"]?([^\)]+?)(\?[^'^"]*?)?['"]?\s*\)\s*[;]*/ig; 
+        var reg = /@import\s*url\(\s*['"]?([^\)]+?)\?__inline['"]?\s*\)\s*[;]*/ig; 
         var dir = path.dirname(file.path);
         return content.replace(reg, function(s, p, i){ 
             //相对于css构建目标目录
