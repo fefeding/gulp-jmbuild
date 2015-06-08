@@ -5,21 +5,21 @@
 
 进入您做为构建工具用的目录
 
-1.首先安装[gulp](http://gulpjs.com/)
+**1.首先安装[gulp](http://gulpjs.com/)**
 
 ```js
 $ npm install -g gulp
 $ npm install --save-dev gulp
 ```
 
-2.安装其它依赖[q/gulp-jshint]。
+**2.安装其它依赖[q/gulp-jshint]。**
 
 ```js
 $ npm install q
 $ npm install gulp-jshint
 ```
 
-3.安装gulp-jmbuild
+**3.安装gulp-jmbuild**
 
 ```js
 $ npm install gulp-jmbuild
@@ -28,7 +28,8 @@ $ npm install gulp-jmbuild
 
 ## 示例
 
-在构建目录下创建 `gbulpfile.js`
+**在构建目录下创建 `gbulpfile.js`**
+
 ```js
 var jshint = require('gulp-jshint');
 var Q = require('q');
@@ -159,4 +160,12 @@ gulp.task('parseHTML', htmlTasks, function (){
 
 
 gulp.task('default', ['jshint','minifyJS', 'cpFile', 'minifyCSS','parseHTML']);
+```
+
+## 运行
+
+在gulpfile.js目录下执行如下命令
+
+```js
+$ gulp
 ```
