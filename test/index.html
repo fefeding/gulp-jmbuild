@@ -8,15 +8,19 @@
 	function __cmdinline(){}
 	function __pkg(){}
 
-	__pkg('/static/js/a.js', 'test/t.js');
+	var a=__pkg('/static/js/a.js');
+	var t=__pkg('test/t.js');
 </script>
 <style>
 	__inline('/static/css/style.css')
 </style>
+
+<link rel="stylesheet" href="__uri('static/css/style.css')" />	
 </head>
 <body>
 </body>
 <script src="http://gqq.gtimg.com/static/mobile/js/v3/pkg/sea.js"></script>
+<script src="__uri(static/js/a.js)"></script>
 <script>
 	
 var cssUrl = __uri('static/css/style.css');

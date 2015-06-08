@@ -7,6 +7,8 @@ var gulp = require('gulp');
 var path = require('path');
 var Stream = require('stream');
 
+var cssbase64 = require('gulp-base64');
+
 
 var jmbuild = require('../../index.js');
 
@@ -122,8 +124,10 @@ gulp.task('cpFile', filetasks,function (){
 });
 
 //压缩css
-var csstasks = jmbuild.cssTask(gulp, config, ['cpFile'], function(stream){
-    return stream.pipe(startFun('css'));
+var csstasks = jmbuild.cssTask(gulp, config, ['cpFile'], function(stream){ 
+    //此处可以自定加使用一些gulp插件来预处理文件
+    //比如cssbase64这个就是使用的gulp-base64来把css听图片换成base64串
+    return stream.pipe(cssbase64({extensions:['svg','png',/\.jpg#datauri$/i]}));
 },function(stream){
     return stream.pipe(startFun('css'));
 });

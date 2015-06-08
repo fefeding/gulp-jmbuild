@@ -268,26 +268,26 @@ exports.parse =  function(options) {
 
     //替换html中的__pkg路径
     function replacePkgAndUri(content, options, buildInfo) {
-        var reg = /(__pkg|__uri)\s*\(\s*([^\)]+)\s*\)\s*[;]*/ig; 
-        return content.replace(reg, function(s, p, i){  
-            var ps = RegExp.$2.split(',');
-            if(ps && ps.length) {
-                for(var j=0;j<ps.length;j++) {
-                    var jp = ps[j].trim().replace(/(^['"]*)|(['"]*$)/g, '');
-                    if(!jp) continue;
-                    var ext = path.extname(jp);
-                    var dest = {'.js':options.jsDestPath,'.css':options.cssDestPath}[ext] || options.destPath;
-                    var fpath = path.join(dest, jp);
-                    if(!buildInfo[fpath]) {
-                        fpath = path.join(options.destPath, jp);
+        var reg = /(__pkg|__uri)\s*\(\s*([^\)]+)\s*\)/ig; 
+        return content.replace(reg, function(s, p, i){
+            var jp = RegExp.$2.trim().replace(/(^['"]*)|(['"]*$)/g, '');
+            if(jp){
+                var ext = path.extname(jp);
+                var dest = {'.js':options.jsDestPath,'.css':options.cssDestPath}[ext] || options.destPath;
+                var fpath = path.join(dest, jp);
+                if(!buildInfo[fpath]) {
+                    fpath = path.join(options.destPath, jp);
+                }
+                //如果有md5则，合到路径中
+                if(buildInfo[fpath] && buildInfo[fpath].md5) {
+                    s =  createMd5Path(jp, buildInfo[fpath].md5, options.md5Separator || '.');
+                    //当用的是__pkg则继续转为字符串，加引号，uri不需要
+                    if(RegExp.$1 == '__pkg') {
+                        s = '"' + s + '"';
                     }
-                    //如果有md5则，合到路径中
-                    if(buildInfo[fpath] && buildInfo[fpath].md5) {
-                        s = s.replace(jp, createMd5Path(jp, buildInfo[fpath].md5, options.md5Separator || '.'));
-                    }
-                } 
-                gutil.log(gutil.colors.blue('replace:'), gutil.colors.green(s));               
-            } 
+                }
+            }            
+            gutil.log(gutil.colors.blue('replace:'), gutil.colors.green(s));
             return s;           
         });
     }
@@ -306,11 +306,16 @@ exports.parse =  function(options) {
 
     //处理内联的css
     function inlineCSS(file, content, options, buildInfo) {
-        var reg = /@import\s*url\(\s*['"]?([^\)]+?)\?__inline['"]?\s*\)\s*[;]*/ig; 
+        var reg = /@import\s*url\(\s*['"]?([^\)]+?)(\?[^'^"]*?)?['"]?\s*\)\s*[;]*/ig; 
         var dir = path.dirname(file.path);
         return content.replace(reg, function(s, p, i){ 
             //相对于css构建目标目录
             var filepath = path.resolve(dir, p);
+            if(!fs.existsSync(filepath)){
+                gutil.log(gutil.colors.cyan('warning:'), gutil.colors.red(pluginName + ": the file " + filepath + " is not exists"));
+                return;
+            } 
+
             var csscontent = fs.readFileSync(filepath, 'utf-8'); 
             //处理其中的url
             csscontent = replaceCSSUrl(csscontent, options, buildInfo);  
@@ -321,7 +326,7 @@ exports.parse =  function(options) {
 
     //处理css中的url路径，或加上md5码
     function replaceCSSUrl(content, options, buildInfo) {
-        var reg = /url\s*\(\s*([^\)]+?)\s*\)/ig;
+        var reg = /url\s*\(\s*([^\)]+?)(\?[^\)]*?)?\s*\)/ig;
         return content.replace(reg, function(s, p, i) {
                 var fpath = path.join(options.dest, p); 
                 //如果有md5则，合到路径中
@@ -566,7 +571,8 @@ exports.createCSSTask = function(gulp, config, depTasks, startFun, endFun) {
             var s = config.css[taskIndex];
             taskIndex ++;
             var dest = path.join(cssDestPath, s.dest || '');
-            var stream = gulp.src(s.source || s, {cwd:config.root});
+            var stream = gulp.src(s.source || s, {cwd:config.root})
+             .pipe(gulp.dest(dest));
             if(startFun && typeof startFun == 'function') {
                 stream = startFun(stream);
              }
@@ -575,8 +581,7 @@ exports.createCSSTask = function(gulp, config, depTasks, startFun, endFun) {
                     "dest": dest,
                     "config": s
                 }))              
-             .pipe(cssuglify())
-             .pipe(gulp.dest(dest));
+             .pipe(cssuglify());
              
              if(s.concat) 
               stream = stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));         

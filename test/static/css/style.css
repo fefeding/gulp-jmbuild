@@ -1,15 +1,7 @@
 
-/*===========================
-文件名  ：style.css
-作  者  ：richiepu(普伟)   
-修改人  ：richiepu(普伟)
-创建时间：2014-11-25 
-修改时间：2014-11-25
-版  本  ：v1.0
-说  明  ：手游吧PC论坛样式
-===========================*/ 
+@import url("./base.css?201");
 
-/* 使命召唤吧皮肤样式 */
+
 .skin-smzh .gb-cont-bg,.skin-50721 .gb-cont-bg{background:#4A688A url(../img/gico-l.png) no-repeat 50% 0;}
 .skin-smzh .gb-bbs-banner img,.skin-50721 .gb-bbs-banner img{display: none;}
 .skin-smzh .gb-footer,.skin-50721 .gb-footer{background: #192334;}
