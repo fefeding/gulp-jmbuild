@@ -1,24 +1,39 @@
 //前端构建
+//路径配置均可以用../此类相对路径
 /*
     config格式：
 {
+    //项目根路径，后面的路径基本都是相对于它的。
     "root": path.resolve('../'),   
+    //构建目标目录，相对于root
     "dest": "dist",
+    //js文件构建目标目录，相对于dest,,,如果你想把它放在不同的地方，可以用类似于../这种改变根路径的方法。
     "jsDest": "static/js",
+    //html文件构建目标目录，相对于dest
     "htmlDest": "",
+    //css文件构建目标目录，相对于dest
     "cssDest": "static/css",
+    //JS文件基础路径段，主要用于模块化提取模块id用处，比例在static/js/test/a.js  构建时就会取static/js后的test/a做为模块id
     "jsBase": "static/js",
+    //文件md5后缀的分隔符，例如：a.{md5}.js
     "md5Separator": ".",
+    //md5码取多少位，
     "md5Size": 8,
+    //JS需要构建的配置
     "js": [
         {
+            //构建源，跟gulp的source方法保持一致，可以是单个文件/目录*.js/数组
+            //以下所有类同
             "source": "static/js/*.js",
+            //是否加上md5后缀,默认false
             'md5': true
         },
         {
             "source": ["static/js/test/**\*.js"],
+            //用于把source中的所有文件合并到同一个文件，并命名为此配置值
             "concat": "t.js",
             'md5': true,
+            //当前配置发布位置，相对于jsDest配置，如果不配置则默认放到jsDest下。
             "dest": 'test'
         }
     ],
@@ -31,10 +46,19 @@
     "html": [
         {
             "source": "index.html",
+            //当有inline模块化js文件时，理否把它依赖的模块一同内嵌进来，默认为false
             "includeModule": true
         }
+    ],
+    //普通文件构建，可以用于图片拷贝和打md5码
+    "files": [
+        {
+            "source": "static/img/*.*",
+            "md5": true,
+            "dest": "static/img"
+        }
     ]
-}
+};
  */
 var Stream = require('stream');
 var gutil = require("gulp-util");
@@ -449,6 +473,7 @@ function createMd5Path(oldpath, md5, md5Separator) {
 
 
 //生成js编译任务
+exports.jsTask =
 exports.createJSTask = function(gulp, config, depTasks, startFun, endFun) {
     var jstasks = [];
     if(!config.js || !config.js.length) return jstasks;
@@ -493,6 +518,7 @@ exports.createJSTask = function(gulp, config, depTasks, startFun, endFun) {
 }
 
 //普通文件任务
+exports.fileTask =
 exports.createFILETask = function(gulp, config, depTasks, startFun, endFun) {
     var tasks = [];
     if(!config.files || !config.files.length) return tasks;
@@ -528,6 +554,7 @@ exports.createFILETask = function(gulp, config, depTasks, startFun, endFun) {
 }
 
 //生成css构建任务
+exports.cssTask = 
 exports.createCSSTask = function(gulp, config, depTasks, startFun, endFun) {
     var tasks = [];
     if(!config.css || !config.css.length) return tasks;
@@ -573,6 +600,7 @@ exports.createCSSTask = function(gulp, config, depTasks, startFun, endFun) {
 
 
 //生成html解析任务
+exports.htmlTask = 
 exports.createHTMLTask = function(gulp, config, depTasks, startFun, endFun) {
   var htmlTaskIndex = 0;
   var htmlTasks = [];
