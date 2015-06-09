@@ -177,7 +177,7 @@ $ gulp
 如果不是，则当为 .js 就会以jsDest为路径，.css就会以cssDest配置路径来计算绝对路径。
 如果以上条件都不符合，则以当前html文件目录为当前路径来计算。!! 
 
-***1.__pkg/__uri函数
+**1.__pkg/__uri函数**
 当在html中使用__pkg('xxx')/__uri('XXX')时，构建时会被自动替换成对应文件路径，如果有配置md5会自动带上md5码(配置在config的配置中)。
 例如：
 ```html
@@ -194,7 +194,7 @@ var a="/static/js/a.49ea7d65.js";
 var t="test/t.fbdd9f3d.js";
 ```
 
-***2.__inline函数
+**2.__inline函数**
 此函数为把对应的文件内容（构建后的）内联到当前html中。
 
  !!#ff0000 注：如果当前html构建配置中有指定"includeModule": true  则当inline一个模块化js文件时，会同时把它所有依赖js一起内联进来。!! 
@@ -221,6 +221,6 @@ define("test/dir/d",["../../b"],function(i,n,t){var d=i("../../b");n.init=functi
 </script>
 ```
 
-***3.css中的import语法
+**3.css中的import语法**
 
 当构建css文件时，会把@import url("./base.css?__inline");指定的文件合并到当前css中。
