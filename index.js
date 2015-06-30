@@ -282,9 +282,9 @@ exports.parse =  function(options) {
                 if(buildInfo[fpath] && buildInfo[fpath].md5) {
                     s =  createMd5Path(jp, buildInfo[fpath].md5, options.md5Separator || '.');
                     //当用的是__pkg则继续转为字符串，加引号，uri不需要                    
-                    if(m == '__pkg') {
+                    //if(m == '__pkg') {
                         s = '"' + s + '"';
-                    }
+                    //}
                 }
             }            
             gutil.log(gutil.colors.blue('replace:'), gutil.colors.green(s));
