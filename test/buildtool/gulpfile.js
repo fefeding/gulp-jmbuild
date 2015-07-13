@@ -8,12 +8,13 @@ var path = require('path');
 var Stream = require('stream');
 
 var cssbase64 = require('gulp-base64');
-
+var runSequence = require('gulp-run-sequence');
 
 var jmbuild = require('../../index.js');
 
 //配置文件
 var config = {
+    "debug": false,
     //项目根路径，后面的路径基本都是相对于它的。
     "root": path.resolve('../'),   
     //构建目标目录，相对于root
@@ -103,8 +104,8 @@ var jstasks = jmbuild.jsTask(gulp, config, ['jshint'], function(stream){
     return stream.pipe(startFun('js'));
 });
 //创建任务，用于执行前面创建的任务
-gulp.task('minifyJS', jstasks,function (){
-    console.log('minifyJS-start');
+gulp.task('build-js', jstasks,function (){
+    console.log('js-start');
     var deferred = Q.defer();
     deferred.resolve();
     return deferred.promise;
@@ -116,22 +117,23 @@ var filetasks = jmbuild.fileTask(gulp, config, [], function(stream){
 },function(stream){
     return stream.pipe(startFun('file'));
 });
-gulp.task('cpFile', filetasks,function (){
-    console.log('cpFile-start');
+gulp.task('build-file', filetasks,function (){
+    console.log('file-start');
     var deferred = Q.defer();
     deferred.resolve();
     return deferred.promise;
 });
 
-//压缩css
-var csstasks = jmbuild.cssTask(gulp, config, ['cpFile'], function(stream){ 
+//压缩css,依赖file拷贝
+var csstasks = jmbuild.cssTask(gulp, config, ['build-file'], function(stream){ 
     //此处可以自定加使用一些gulp插件来预处理文件
     //比如cssbase64这个就是使用的gulp-base64来把css听图片换成base64串
     return stream.pipe(cssbase64({extensions:['svg','png',/\.jpg#datauri$/i]}));
 },function(stream){
     return stream.pipe(startFun('css'));
 });
-gulp.task('minifyCSS', csstasks,function (){
+//构建css任务
+gulp.task('build-style', csstasks,function (){
     console.log('minifyCSS-start');
     var deferred = Q.defer();
     deferred.resolve();
@@ -141,25 +143,58 @@ gulp.task('minifyCSS', csstasks,function (){
 
 
 //html解析主任务
-var htmlTasks = jmbuild.htmlTask(gulp, config, ['minifyJS', 'minifyCSS'], function(stream){
+var htmlTasks = jmbuild.htmlTask(gulp, config, ['build-js', 'build-style'], function(stream){
     return stream.pipe(startFun('html'));
 },function(stream){
     return stream.pipe(startFun('html'));
 });
-gulp.task('parseHTML', htmlTasks, function (){
+gulp.task('build-html', htmlTasks, function (){
     var deferred = Q.defer();
     deferred.resolve();
     return deferred.promise;
 });
 
-//监听
-//gulp.task('watch', function () {
- //   gulp.watch(sources, ['jshint','minifyJS', 'cpFile', 'minifyCSS','parseHTML']);
-//});
+var tasks = ['build-js','build-html'];
+//如果是debug模式，则启用监听
+if(config.debug) {
+    //监听
+    console.log('watching ...');
+    gulp.task('watch', function () {
+        console.log('start watch');        
+        jmbuild.watch(gulp, config, function(task, source, evt){
+            //执行文件改变后，重新构建
+            runSequence(task.name, function(){
+                console.log(task);
+                //这里可以部署等操作，
+                /*
+                var req = request.post('http://at.qq.com/static/upload/receiver2.php', {
+                    formData: {
+                        from: '/bbs_htdocs/syb_bbs/templates',
+                        to: '/data/home/user00/gqq/web/bbs_htdocs/syb_bbs/templates/forum.tpl',
+                        file: fs.createReadStream('E:/syb/trunk/web/bbs_htdocs/syb_bbs/templates/forum.tpl')
+                      }
+                },function(err, rsp, body) {
+                    if (err) {
+                        console.log('Error!');
+                      } else {
+                        console.log(body);
+                      }
+                });
+                //var form = req.form();
+                //form.append('from', '/bbs_htdocs/syb_bbs/templates');
+                //form.append('to','/data/home/user00/gqq/web/bbs_htdocs/syb_bbs/');
+                //form.append('file', fs.createReadStream('E:/syb/trunk/web/bbs_htdocs/syb_bbs/templates/forum.tpl'),{filename: 'forum.tpl'});
+                return;*/
+            });
+        });
+    }); 
+    tasks.push('watch');    
+}
 
-gulp.task('default', ['jshint','minifyJS', 'cpFile', 'minifyCSS','parseHTML']);
+gulp.task('default', tasks);  
 
 
+//下面二个函数只是测试，你可以在里面做你想要的预处理或结束后处理事情
 //我是一个测试start
 function startFun(msg) {
     var stream = new Stream.Transform({objectMode: true});    

@@ -3,8 +3,9 @@
 /*
     config格式：
 {
+    "debug": false,
     //项目根路径，后面的路径基本都是相对于它的。
-    "root": path.resolve('../'),   
+    "root": path.resolve('../'),
     //构建目标目录，相对于root
     "dest": "dist",
     //js文件构建目标目录，相对于dest,,,如果你想把它放在不同的地方，可以用类似于../这种改变根路径的方法。
@@ -66,6 +67,7 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var cssuglify = require('gulp-minify-css');
 var rename = require('gulp-rename');
+//var runSequence = require('gulp-run-sequence');
 var Q = require('q');
 var PluginError = gutil.PluginError;
 var through = require("through2");
@@ -85,8 +87,8 @@ var pluginName = 'gulp-jmbuild';
 
 
 exports.parse =  function(options) {
-    options = options || {};   
-    
+    options = options || {};
+
     var stream = through.obj(function (file, enc, cb) {
 
         if (!file) {
@@ -128,14 +130,14 @@ exports.parse =  function(options) {
 	function parseModuleId(filepath, transportBase) {
 		transportBase = transportBase.replace(/\\/g, "/");
 		filepath = filepath.replace(/\\/g, "/");
-        
+
 		var index = filepath.indexOf(transportBase);
 		if(transportBase && index > -1) {
 			id = filepath.substr(index + transportBase.length).replace(/^\/|\.\w+$/g, "");
 		}
 		else {
 			id = path.basename(filepath).replace(/^\/|\.\w+$/g, "");
-		}		
+		}
 		return id;
 	}
 
@@ -145,10 +147,9 @@ exports.parse =  function(options) {
 
 		var content = file.contents.toString();
 		var astModule = ast.parseFirst(content);
-        
-		if (!astModule) {
 
-            gutil.log(gutil.colors.cyan('warning:'), gutil.colors.yellow(pluginName + ": the file " + file.path + " is not valid"));
+		if (!astModule) {
+            gutil.log(gutil.colors.cyan('warning:'), gutil.colors.yellow(pluginName + "[cmd]: the file " + file.path + " is not valid"));
 			return
 		}
 		if(!astModule.id) {
@@ -157,9 +158,9 @@ exports.parse =  function(options) {
 
         gutil.log(gutil.colors.cyan('module id:'), gutil.colors.green(astModule.id));
 
-		content = ast.modify(content, astModule).print_to_string({beautify: true});	
+		content = ast.modify(content, astModule).print_to_string({beautify: true});
 		file.contents = new Buffer(content);
-    
+
         var info = {
             "path": file.path,
             "id": astModule.id
@@ -167,18 +168,18 @@ exports.parse =  function(options) {
         var key = file.path;
         if (file.path[0] == '.') {
           key = path.join(file.base, file.path);
-        } 
+        }
         setCache(key, info);
 	}
 
     //解析html，从html中提取cmd入口和<script>标签
     function parseHtml(file, options) {
         var buildInfo = getCache();
-       
+
         gutil.log(gutil.colors.cyan('parseHtml:'), gutil.colors.green(file.path));
-       
+
         var content = file.contents.toString();
-        content = inlineFile(content, options, buildInfo);
+        if(!options.debug) content = inlineFile(content, options, buildInfo);
         content = replacePkgAndUri(content, options, buildInfo);
         file.contents = new Buffer(content);
     }
@@ -188,7 +189,7 @@ exports.parse =  function(options) {
         var reg = /(__cmdinline|__inline)\s*\(\s*([^\)]+)\s*\)\s*[;]*/ig;
         console.log('start replace __cmdinline/__inline');
         var reqModuleJS = {};//已inline过的js模块
-        return content.replace(reg, function(s, p, i){  
+        return content.replace(reg, function(s, p, i){
             var ps = RegExp.$2.split(',');
             var jscontent = '';
             if(ps && ps.length) {
@@ -199,16 +200,16 @@ exports.parse =  function(options) {
                     if(jp[0] != '/' && jp[0] != '.') {
                         var ext = path.extname(jp);
                         var dest = {'.js':options.jsDestPath,'.css':options.cssDestPath}[ext] || options.destPath;
-                        var filepath = path.join(dest, jp);  
+                        var filepath = path.join(dest, jp);
                     }
                     else {
                         //相对于当前html路径
-                        var filepath = path.join(options.dest, jp);  
+                        var filepath = path.join(options.dest, jp);
                     }
                     jscontent += readInlineContent(filepath, buildInfo, reqModuleJS, options) + '\n';
-                }                
-            } 
-            return jscontent;           
+                }
+            }
+            return jscontent;
         });
     }
 
@@ -229,15 +230,15 @@ exports.parse =  function(options) {
 
         //如果已经处理过，则直接返回空
         if(arrs[filepath]) return '';
-        
+
         if(filecontent || fs.existsSync(filepath)) {
-            arrs[filepath] = 1;//表示当前路径js已inline过了，            
+            arrs[filepath] = 1;//表示当前路径js已inline过了，
             gutil.log(gutil.colors.blue('inline file:'), gutil.colors.green(filepath));
             filecontent = filecontent || fs.readFileSync(filepath, 'utf-8');
             //如果指定需要包含依赖
             if(options.config.includeModule && path.extname(filepath) == '.js') {
                 //解析当前脚本依赖，把所有依赖全inline进页面
-                var astModule = ast.parseFirst(filecontent);            
+                var astModule = ast.parseFirst(filecontent);
                 //如果包含依赖
                 if(astModule && astModule.dependencies && astModule.dependencies.length) {
                     var dir = path.dirname(filepath);
@@ -251,7 +252,7 @@ exports.parse =  function(options) {
                             //相对当于前调用js的路径
                             var p = path.resolve(dir, id);
                         }
-                        
+
                         if(!path.extname(p)) p += '.js';
                        // console.log('inline module:' + p);
                         content += readInlineContent(p, buildInfo, arrs, options) + "\n";
@@ -268,8 +269,8 @@ exports.parse =  function(options) {
 
     //替换html中的__pkg路径
     function replacePkgAndUri(content, options, buildInfo) {
-        var reg = /(__pkg|__uri)\s*\(\s*([^\)]+)\s*\)/ig; 
-        return content.replace(reg, function(s, m, p){
+        var reg = /(__pkg|__uri)\s*\(\s*([^\)]+)\s*\)/ig;
+        return content.replace(reg, function(s, m, p) {
             var jp = p.trim().replace(/(^['"]*)|(['"]*$)/g, '');
             if(jp){
                 var ext = path.extname(jp);
@@ -279,25 +280,28 @@ exports.parse =  function(options) {
                     fpath = path.join(options.destPath, jp);
                 }
                 //如果有md5则，合到路径中
-                if(buildInfo[fpath] && buildInfo[fpath].md5) {
-                    s =  createMd5Path(jp, buildInfo[fpath].md5, options.md5Separator || '.');
-                    //当用的是__pkg则继续转为字符串，加引号，uri不需要                    
-                    //if(m == '__pkg') {
-                        s = '"' + s + '"';
-                    //}
+                var info = buildInfo[fpath];
+                s = jp;
+                if(info) {
+                    if(info.md5) s =  createMd5Path(jp, info.md5, options.md5Separator || '.');
+                    else s = jp;
                 }
-            }            
+                //当用的是__pkg则继续转为字符串，加引号，uri不需要
+                //if(m == '__pkg') {
+                    s = '"' + s + '"';
+                //}
+            }
             gutil.log(gutil.colors.blue('replace:'), gutil.colors.green(s));
-            return s;           
+            return s;
         });
     }
 
     //处理css
     function parseCSS(file, options) {
         var buildInfo = getCache();
-       
+
         gutil.log(gutil.colors.cyan('parseCSS:'), gutil.colors.green(file.path));
-       
+
         var content = file.contents.toString();
         content = replaceCSSUrl(content, options, buildInfo);
         content = inlineCSS(file, content, options, buildInfo);
@@ -306,21 +310,21 @@ exports.parse =  function(options) {
 
     //处理内联的css
     function inlineCSS(file, content, options, buildInfo) {
-        var reg = /@import\s*url\(\s*['"]?([^\)]+?)\?__inline['"]?\s*\)\s*[;]*/ig; 
+        var reg = /@import\s*url\(\s*['"]?([^\)]+?)(\?__inline)?['"]?\s*\)\s*[;]*/ig;
         var dir = path.dirname(file.path);
-        return content.replace(reg, function(s, p, i){ 
+        return content.replace(reg, function(s, p, i){
             //相对于css构建目标目录
             var filepath = path.resolve(dir, p);
             if(!fs.existsSync(filepath)){
                 gutil.log(gutil.colors.cyan('warning:'), gutil.colors.red(pluginName + ": the file " + filepath + " is not exists"));
                 return;
-            } 
+            }
 
-            var csscontent = fs.readFileSync(filepath, 'utf-8'); 
+            var csscontent = fs.readFileSync(filepath, 'utf-8');
             //处理其中的url
-            csscontent = replaceCSSUrl(csscontent, options, buildInfo);  
-            gutil.log(gutil.colors.blue('inlineCSS:'), gutil.colors.green(filepath));            
-            return csscontent;           
+            csscontent = replaceCSSUrl(csscontent, options, buildInfo);
+            gutil.log(gutil.colors.blue('inlineCSS:'), gutil.colors.green(filepath));
+            return csscontent;
         });
     }
 
@@ -328,14 +332,14 @@ exports.parse =  function(options) {
     function replaceCSSUrl(content, options, buildInfo) {
         var reg = /url\s*\(\s*([^\)]+?)(\?[^\)]*?)?\s*\)/ig;
         return content.replace(reg, function(s, p, i) {
-                var fpath = path.join(options.dest, p); 
+                var fpath = path.join(options.dest, p);
                 //如果有md5则，合到路径中
                 if(buildInfo[fpath] && buildInfo[fpath].md5) {
                     s = s.replace(p, createMd5Path(p, buildInfo[fpath].md5, options.md5Separator || '.'));
                 }
-           
-            gutil.log(gutil.colors.blue('css url:'), gutil.colors.green(s)); 
-            return s;           
+
+            gutil.log(gutil.colors.blue('css url:'), gutil.colors.green(s));
+            return s;
         });
     }
 }
@@ -362,7 +366,7 @@ exports.md5 = function(opt) {
             var key = file.path;
             if (file.path[0] == '.') {
               key = path.join(file.base, file.path);
-            } 
+            }
             var dir = path.dirname(key);
             var ext = path.extname(key);
             var basename = path.basename(key, ext);
@@ -398,8 +402,8 @@ function calcMd5(file, slice) {
 //获取当前流的路径
 //经过各插件处理后的路径
 function saveInfo(opt) {
-    var stream = new Stream.Transform({objectMode: true});    
-    stream._transform = function(file, unused, callback) {  
+    var stream = new Stream.Transform({objectMode: true});
+    stream._transform = function(file, unused, callback) {
         var key = file.path;
         if (key[0] == '.') {
           key = path.join(file.base, key);
@@ -418,16 +422,18 @@ function saveInfo(opt) {
                 info.md5 = info.path.substring(start, di);
                 key = info.path.replace(opt.md5Separator + info.md5, '');
             }
-        } */       
+        } */
         setCache(key, info);
         callback(null, file);
       };
-    return stream;   
+    return stream;
 }
 
 //获取当前编译信息
-function getInfo() {
-    return getCache();
+exports.getInfo = function(key) {    
+    var infos = getCache();
+    if(key) return infos[key];
+    return infos;
 }
 
 //清除缓存文件
@@ -476,6 +482,153 @@ function createMd5Path(oldpath, md5, md5Separator) {
     return path.join(path.dirname(oldpath), basename+md5Separator+md5+ext).replace(/\\/g,'/');
 }
 
+//组合资源配置，返回组件的资源数组
+exports.getSources = function(config) {
+    var sources = [];
+    //当传入多个组合时，循环处理每个
+    if(arguments.length > 1) {
+        for(var i=0;i<arguments.length;i++) {
+            var c = arguments[i];
+            if(Array.isArray(c)) {
+                var r = this.getSources(c);
+                sources = sources.concat(r);
+            }
+        }
+        return sources;
+    }    
+    if(config && config.length) {
+        for(var i=0;i<config.length;i++) {
+            if(typeof config[i] == 'string') {
+                sources.push(config[i]);
+            }
+            else {
+                if(Array.isArray(config[i].source)) {
+                    sources = sources.concat(config[i].source);
+                }
+                else {
+                    sources.push(config[i].source);
+                }
+            }
+        }
+    }
+    return sources;
+}
+
+//监控文件变动
+exports.watch = function(gulp, config, callback, startFun, endFun) {
+    if(!this.taskMapping) this.taskMapping = {};
+    if(config.js && config.js.length) {
+        for(var i=0;i<config.js.length;i++) {
+            var s = config.js[i];
+            watchJSTask(gulp, s, config, callback, startFun, endFun);
+        }
+    }    
+    if(config.files && config.files.length) {
+        for(var i=0;i<config.files.length;i++) {
+            var s = config.files[i];
+            watchFILETask(gulp, s, config, callback, startFun, endFun);
+        }
+    }    
+    if(config.css && config.css.length) {
+        for(var i=0;i<config.css.length;i++) {
+            var s = config.css[i];
+            watchCSSTask(gulp, s, config, callback, startFun, endFun);
+        }
+    }    
+    if(config.html && config.html.length) {
+        for(var i=0;i<config.html.length;i++) {
+            var s = config.html[i];
+            watchHTMLTask(gulp, s, config, callback, startFun, endFun);
+        }
+    }    
+}
+//监控JS文件
+function watchJSTask(gulp, s, config, callback, startFun, endFun) {
+    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
+        console.log(evt);
+        //如果已存在当前task，则直返回
+        var task = exports.taskMapping[evt.path];
+        
+        if(!task) {
+            task = exports.taskMapping[evt.path] = {};
+            task.name = evt.path;
+            task.path = evt.path;            
+            var jsDestPath = path.resolve(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
+            task.dest = path.join(jsDestPath, s.dest || '', path.basename(task.path));
+            s.source = task.path;
+            gulp.task(task.name, function(){
+                
+                return runJSTaskStream(gulp, s, config, startFun, endFun);
+            });            
+            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create js task ' + task.name));
+        }
+        callback && callback(task, s, evt);
+    });
+}
+//监控普通文件
+function watchFILETask(gulp, s, config, callback, startFun, endFun) {
+    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
+        //如果已存在当前task，则直返回
+        var task = exports.taskMapping[evt.path];
+        if(!task) {
+            task = exports.taskMapping[evt.path] = {};  
+            task.name = evt.path;
+            task.path = evt.path;
+            var fileDestPath = path.resolve(config.root, config.dest || '', config.fileDest || ''); //file目标构建目录
+            task.dest = path.join(fileDestPath, s.dest || '', path.basename(task.path));
+            s.source = task.path;
+            gulp.task(task.name, function(){
+                
+                return runFileTaskStream(gulp, s, config,  startFun, endFun);
+            });
+            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create file task ' + task.name));
+        }
+        callback && callback(task, s, evt);
+    });
+}
+//监控css文件
+function watchCSSTask(gulp, s, config, callback, startFun, endFun) {
+    
+    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
+        //如果已存在当前task，则直返回
+        var task = exports.taskMapping[evt.path];
+        if(!task) {
+            task = exports.taskMapping[evt.path] = {};  
+            task.name = evt.path;
+            task.path = evt.path;
+            var cssDestPath = path.resolve(config.root, config.dest || '', config.cssDest || ''); //css目标构建目录
+            task.dest = path.join(cssDestPath, s.dest || '', path.basename(task.path));
+            s.source = task.path;
+            gulp.task(task.name, function(){
+                
+                return runCSSTaskStream(gulp, s, config, startFun, endFun);
+            });
+            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create css task ' + task.name));
+        }
+        callback && callback(task, s, evt);
+    });
+}
+//监控html文件
+function watchHTMLTask(gulp, s, config, callback, startFun, endFun) {
+    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
+        //如果已存在当前task，则直返回
+        var task = exports.taskMapping[evt.path];
+        if(!task) {
+            task = exports.taskMapping[evt.path] = {};  
+            task.name = evt.path;
+            task.path = evt.path;
+            var destPath = path.resolve(config.root, config.dest || '');
+            task.dest = path.join(destPath, config.htmlDest || '', s.dest || '', path.basename(task.path)); 
+            s.source = task.path;
+            gulp.task(task.name, function(){
+
+                return runHTMLTaskStream(gulp, s, config, startFun, endFun);
+            });
+            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create html task ' + task.name));
+        }
+        callback && callback(task, s, evt);
+    });
+}
 
 //生成js编译任务
 exports.jsTask =
@@ -483,43 +636,54 @@ exports.createJSTask = function(gulp, config, depTasks, startFun, endFun) {
     var jstasks = [];
     if(!config.js || !config.js.length) return jstasks;
     var taskIndex = 0;
-    var jsDestPath = path.resolve(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
-    for(var i=0;i<config.js.length;i++) { 
+    
+    for(var i=0;i<config.js.length;i++) {
         var taskname = pluginName + "_minify_js_" + i;
         gulp.task(taskname, depTasks, function(){
             var s = config.js[taskIndex];
             taskIndex ++;
-            var dest = path.join(jsDestPath, s.dest || '');
-            var stream = gulp.src(s.source || s, {cwd:config.root}) 
-             .pipe(exports.parse({
-                    "base": path.resolve(config.root,config.jsBase),
-                    "type": 'js',
-                    "config": s
-                }));
-             if(startFun && typeof startFun == 'function') {
-                stream = startFun(stream);
-             }
-             stream.pipe(uglify())
-             .pipe(gulp.dest(dest));
-             
-             if(s.concat) 
-              stream = stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));         
-             if(s.rename) 
-              stream = stream.pipe(rename(s.rename)).pipe(gulp.dest(dest));
-
-             if(s.md5) 
-              stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
-
-            if(endFun && typeof endFun == 'function') {
-                stream = endFun(stream);
-             }
-            return stream.pipe(gulp.dest(dest))
-             .pipe(saveInfo(config));
+            return runJSTaskStream(gulp, s, config, startFun, endFun);
         });
 
-        jstasks.push(taskname);        
+        jstasks.push(taskname);
     }
     return jstasks;
+}
+
+//对js文件流进行处理
+function runJSTaskStream(gulp, s, config, startFun, endFun) {
+    var jsDestPath = path.resolve(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
+    var dest = path.join(jsDestPath, s.dest || '');
+    var stream = gulp.src(s.source || s, {cwd:config.root})
+     .pipe(exports.parse({
+            "base": path.resolve(config.root,config.jsBase),
+            "type": 'js',
+            "debug": config.debug,
+            "config": s
+        }));
+     if(startFun && typeof startFun == 'function') {
+        startFun(stream);
+     }
+
+     //只有在非debug下才进行压缩
+     if(!config.debug) {
+        stream.pipe(uglify());
+     }
+     stream.pipe(gulp.dest(dest));
+
+     if(s.concat)
+       stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));
+     if(s.rename)
+       stream.pipe(rename(s.rename)).pipe(gulp.dest(dest));
+
+     if(!config.debug && s.md5)
+       stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
+
+    if(endFun && typeof endFun == 'function') {
+        endFun(stream);
+     }
+    return stream.pipe(gulp.dest(dest))
+     .pipe(saveInfo(config));
 }
 
 //普通文件任务
@@ -528,125 +692,149 @@ exports.createFILETask = function(gulp, config, depTasks, startFun, endFun) {
     var tasks = [];
     if(!config.files || !config.files.length) return tasks;
     var taskIndex = 0;
-    var fileDestPath = path.resolve(config.root, config.dest || '', config.fileDest || ''); //file目标构建目录
-    for(var i=0;i<config.files.length;i++) { 
+    
+    for(var i=0;i<config.files.length;i++) {
         var taskname = pluginName + "_minify_file_" + i;
         gulp.task(taskname, depTasks, function(){
             var s = config.files[taskIndex];
             taskIndex ++;
-            var dest = path.join(fileDestPath, s.dest || '');
-            var stream = gulp.src(s.source || s, {cwd:config.root})
-             .pipe(gulp.dest(dest));
-             if(startFun && typeof startFun == 'function') {
-                stream = startFun(stream);
-             }
-             if(s.concat) 
-              stream = stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));         
-             if(s.rename) 
-              stream = stream.pipe(rename(s.rename)).pipe(gulp.dest(dest));
-
-             if(s.md5) 
-              stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size})).pipe(gulp.dest(dest));
-             if(endFun && typeof endFun == 'function') {
-                stream = endFun(stream);
-             }
-            return stream.pipe(saveInfo(config));
+            return runFileTaskStream(gulp, s, config, startFun, endFun);
         });
 
-        tasks.push(taskname);        
+        tasks.push(taskname);
     }
     return tasks;
 }
 
+//普通文件流处理
+function runFileTaskStream(gulp, s, config, startFun, endFun) {
+    var fileDestPath = path.resolve(config.root, config.dest || '', config.fileDest || ''); //file目标构建目录
+    var dest = path.join(fileDestPath, s.dest || '');
+    var stream = gulp.src(s.source || s, {cwd:config.root})
+     .pipe(gulp.dest(dest));
+     if(startFun && typeof startFun == 'function') {
+        startFun(stream);
+     }
+     if(s.concat)
+        stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));
+     if(s.rename)
+        stream.pipe(rename(s.rename)).pipe(gulp.dest(dest));
+
+     if(s.md5)
+        stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size})).pipe(gulp.dest(dest));
+     if(endFun && typeof endFun == 'function') {
+        endFun(stream);
+     }
+    return stream.pipe(saveInfo(config));
+}
+
 //生成css构建任务
-exports.cssTask = 
+exports.cssTask =
 exports.createCSSTask = function(gulp, config, depTasks, startFun, endFun) {
     var tasks = [];
     if(!config.css || !config.css.length) return tasks;
     var taskIndex = 0;
-    var cssDestPath = path.resolve(config.root, config.dest || '', config.cssDest || ''); //css目标构建目录
-    for(var i=0;i<config.css.length;i++) { 
+    
+    for(var i=0;i<config.css.length;i++) {
         var taskname = pluginName + "_minify_css_" + i;
         gulp.task(taskname, depTasks, function(){
             var s = config.css[taskIndex];
             taskIndex ++;
-            var dest = path.join(cssDestPath, s.dest || '');
-            var stream = gulp.src(s.source || s, {cwd:config.root})
-             .pipe(gulp.dest(dest));
-            if(startFun && typeof startFun == 'function') {
-                stream = startFun(stream);
-             }
-            stream.pipe(exports.parse({
-                    "type": 'css',
-                    "dest": dest,
-                    "config": s
-                }))              
-             .pipe(cssuglify());
-             
-             if(s.concat) 
-              stream = stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));         
-             if(s.rename) 
-              stream = stream.pipe(rename(s.rename)).pipe(gulp.dest(dest));
-
-             if(s.md5) 
-              stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
-
-            if(endFun && typeof endFun == 'function') {
-                stream = endFun(stream);
-             }
-            return stream.pipe(gulp.dest(dest))
-             .pipe(saveInfo(config));
+            return runCSSTaskStream(gulp, s, config, startFun, endFun);
         });
 
-        tasks.push(taskname);        
+        tasks.push(taskname);
     }
     return tasks;
 }
 
+//CSS文件流任务处理
+function runCSSTaskStream(gulp, s, config, startFun, endFun) {
+    var cssDestPath = path.resolve(config.root, config.dest || '', config.cssDest || ''); //css目标构建目录
+    var dest = path.join(cssDestPath, s.dest || '');
+    var stream = gulp.src(s.source || s, {cwd:config.root})
+     .pipe(gulp.dest(dest));
+    if(startFun && typeof startFun == 'function') {
+        startFun(stream);
+     }
+    stream.pipe(exports.parse({
+            "type": 'css',
+            "dest": dest,
+            "debug": config.debug,
+            "config": s
+        }));
+    //只有在非debug下才进行压缩
+     if(!config.debug) {
+        stream.pipe(cssuglify());
+     }
+
+     if(s.concat)
+        stream.pipe(concat(s.concat)).pipe(gulp.dest(dest));
+     if(s.rename)
+        stream.pipe(rename(s.rename)).pipe(gulp.dest(dest));
+
+     if(!config.debug && s.md5)
+        stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
+
+    if(endFun && typeof endFun == 'function') {
+        endFun(stream);
+     }
+    return stream.pipe(gulp.dest(dest))
+     .pipe(saveInfo(config));
+}
 
 //生成html解析任务
-exports.htmlTask = 
+exports.htmlTask =
 exports.createHTMLTask = function(gulp, config, depTasks, startFun, endFun) {
   var htmlTaskIndex = 0;
   var htmlTasks = [];
-  var destPath = path.resolve(config.root, config.dest || '');
-  var jsDestPath = path.resolve(destPath, config.jsDest || ''); //js目标构建目录
-  var cssDestPath = path.resolve(destPath, config.cssDest || ''); //css目标构建目录  
-  var htmlDestPath = path.resolve(destPath, config.htmlDest || ''); //html目标构建目录
-  var fileDestPath = path.resolve(destPath, config.fileDest || ''); //file目标构建目录
+  
 
-  for(var i=0;i<config.html.length;i++) { 
+  for(var i=0;i<config.html.length;i++) {
       var taskname = pluginName + "_parse_html_" + i;
       htmlTasks.push(taskname);
       gulp.task(taskname, depTasks, function(){
         var s = config.html[htmlTaskIndex];
         htmlTaskIndex++;
-
-        var dest = path.resolve(destPath, config.htmlDest || '', s.dest || '');
-        var stream = gulp.src(s.source || s, {cwd:config.root});
-        if(startFun && typeof startFun == 'function') {
-            stream = startFun(stream);
-         }
-         stream.pipe(exports.parse({
-                "type": 'html',
-                "root": config.root,
-                "destPath": destPath,
-                "jsDestPath": jsDestPath,
-                "cssDestPath": cssDestPath,
-                "htmlDestPath": htmlDestPath,
-                "fileDestPath": fileDestPath,
-                "dest": dest,
-                "config": s
-            })).pipe(gulp.dest(dest));
-                 
-         if(s.rename) {
-            stream = stream.pipe(rename(s.rename));
-         }
-         if(endFun && typeof endFun == 'function') {
-            stream = endFun(stream);
-         }
-         return stream.pipe(gulp.dest(dest));
+        return runHTMLTaskStream(gulp, s, config, startFun, endFun);
+        
     });
   }
   return htmlTasks;
+}
+
+//html文件流任务处理
+function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
+    
+    var destPath = path.resolve(config.root, config.dest || '');
+    var jsDestPath = path.resolve(destPath, config.jsDest || ''); //js目标构建目录
+    var cssDestPath = path.resolve(destPath, config.cssDest || ''); //css目标构建目录
+    var htmlDestPath = path.resolve(destPath, config.htmlDest || ''); //html目标构建目录
+    var fileDestPath = path.resolve(destPath, config.fileDest || ''); //file目标构建目录
+    var dest = path.resolve(destPath, config.htmlDest || '', s.dest || '');
+
+    var stream = gulp.src(s.source || s, {cwd:config.root});
+    if(startFun && typeof startFun == 'function') {
+        startFun(stream);
+     }
+     stream.pipe(exports.parse({
+            "type": 'html',
+            "debug": config.debug,
+            "root": config.root,
+            "dest": dest,
+            "destPath": destPath,
+            "jsDestPath": jsDestPath,
+            "cssDestPath": cssDestPath,
+            "htmlDestPath": htmlDestPath,
+            "fileDestPath": fileDestPath,
+            "config": s
+        })).pipe(gulp.dest(dest));
+
+     if(s.rename) {
+        stream.pipe(rename(s.rename));
+     }
+     if(endFun && typeof endFun == 'function') {
+        endFun(stream);
+     }
+     return stream.pipe(gulp.dest(dest));
 }

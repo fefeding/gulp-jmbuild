@@ -1,1 +1,5 @@
-function test(){alert("12334")}
+
+function test() {
+	alert('12334');
+}
+

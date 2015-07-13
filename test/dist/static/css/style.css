@@ -1,8 +1,13 @@
 
-@import url("./base.css?201");
+
+/*i am base.css*/
+html,body{
+	margin:0;
+	padding:0;
+}
 
 
-.skin-smzh .gb-cont-bg,.skin-50721 .gb-cont-bg{background:#4A688A url(../img/gico-l.png) no-repeat 50% 0;}
+.skin-smzh .gb-cont-bg,.skin-50721 .gb-cont-bg{background:#4A688A url(../img/gico-l.653ad849.png) no-repeat 50% 0;}
 .skin-smzh .gb-bbs-banner img,.skin-50721 .gb-bbs-banner img{display: none;}
 .skin-smzh .gb-footer,.skin-50721 .gb-footer{background: #192334;}
 .skin-smzh .gb-frs li,.skin-50721 .gb-frs li{color: #91969F;} 
