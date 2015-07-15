@@ -14,7 +14,7 @@ var jmbuild = require('../../index.js');
 
 //配置文件
 var config = {
-    "debug": false,
+    "debug": false,//如果是true,则不全合并和压缩文件，也不会打md5码
     //项目根路径，后面的路径基本都是相对于它的。
     "root": path.resolve('../'),   
     //构建目标目录，相对于root
@@ -26,6 +26,7 @@ var config = {
     //css文件构建目标目录，相对于dest
     "cssDest": "static/css",
     //JS文件基础路径段，主要用于模块化提取模块id用处，比例在static/js/test/a.js  构建时就会取static/js后的test/a做为模块id
+    //如果js文件配置中有配置base，则用文件配置中的base为准 
     "jsBase": "static/js",
     //文件md5后缀的分隔符，例如：a.{md5}.js
     "md5Separator": ".",
@@ -46,7 +47,17 @@ var config = {
             "concat": "t.js",
             'md5': true,
             //当前配置发布位置，相对于jsDest配置，如果不配置则默认放到jsDest下。
-            "dest": 'test'
+            "dest": 'test',
+            //这里要做用主要是会在模块id中加上test/**做为路径，并在debug时，单独文件构建会放到test/**下面，而不是合到t.js
+            "base": 'static/js'
+        },
+        {
+            "source": "static/js/test2/**/*.js",           
+            'md5': true,
+            //当前配置发布位置，相对于jsDest配置，如果不配置则默认放到jsDest下。
+            "dest": 'test2',
+            //如果有指定base,则会把文件构建到dest目录，然后去除base后目录路径不变，比如此例就会放到test2/**下面
+            "base": 'static/js'
         }
     ],
     "css": [
@@ -67,7 +78,10 @@ var config = {
         {
             "source": "static/img/*.*",
             "md5": true,
-            "dest": "static/img"
+            "dest": "static/img",
+            //false表示以流的方式处理，否则表示直接读取到contents中
+            //二级进制文件最好设为false
+            "buffer": false
         }
     ]
 };
@@ -90,7 +104,7 @@ gulp.task('jshint', function () {
             }
         }
     }
-    console.log('jshint:');
+    //console.log('jshint:');
     return gulp.src(sources, {cwd:config.root})
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
@@ -128,7 +142,8 @@ gulp.task('build-file', filetasks,function (){
 var csstasks = jmbuild.cssTask(gulp, config, ['build-file'], function(stream){ 
     //此处可以自定加使用一些gulp插件来预处理文件
     //比如cssbase64这个就是使用的gulp-base64来把css听图片换成base64串
-    return stream.pipe(cssbase64({extensions:['svg','png',/\.jpg#datauri$/i]}));
+    //return stream.pipe(cssbase64({extensions:['svg','png',/\.jpg#datauri$/i]}));
+    return stream;
 },function(stream){
     return stream.pipe(startFun('css'));
 });

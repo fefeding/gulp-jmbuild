@@ -1,6 +1,6 @@
 {
   "name": "gulp-jmbuild",
-  "version": "1.1.27",
+  "version": "1.1.28",
   "description": "前端构建工具",
   "author": {
     "name": "jiamao",
@@ -55,5 +55,6 @@
     "tarball": ""
   },
   "directories": {},
-  "readme": "ERROR: No README data found!"
+  "readme": "README.md",
+  "log": "支持debug模式构建,支持debug后监听文件改动,支持多级文件自动构建到对应的目录下"
 }

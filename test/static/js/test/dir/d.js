@@ -1,6 +1,6 @@
-define(function(require,exports,module) {
-	var b = require('../../b');
-	exports.init = function() {
-		b.init('d');
-	};
+define([ "../../b" ], function(require, exports, module) {
+    var b = require("../../b");
+    exports.init = function() {
+        b.init("d");
+    };
 });
