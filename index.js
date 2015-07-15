@@ -17,7 +17,7 @@
     //JS文件基础路径段，主要用于模块化提取模块id用处，比例在static/js/test/a.js  构建时就会取static/js后的test/a做为模块id
     "jsBase": "static/js",
     //文件md5后缀的分隔符，例如：a.{md5}.js
-    "md5Separator": ".",
+    "separator": ".",
     //md5码取多少位，
     "md5Size": 8,
     //JS需要构建的配置
@@ -27,7 +27,9 @@
             //以下所有类同
             "source": "static/js/*.js",
             //是否加上md5后缀,默认false
-            'md5': true
+            'md5': true,
+            //名称扩展，会直接加到文件名后缀前,例如：a.324242.lc.js
+            "expand": 'lc'
         },
         {
             "source": ["static/js/test/**\*.js"],
@@ -282,13 +284,13 @@ exports.parse =  function(options) {
                 var info = buildInfo[fpath];
                 s = jp;
                 if(info) {
-                    if(info.md5) s =  createMd5Path(jp, info.md5, options.md5Separator || '.');
+                    if(info.path) s =  path.dirname(jp) + '/' + path.basename(info.path);
                     else s = jp;
                 }
                 //当用的是__pkg则继续转为字符串，加引号，uri不需要
-                //if(m == '__pkg') {
+                if(m == '__pkg') {
                     s = '"' + s + '"';
-                //}
+                }
             }
             gutil.log(gutil.colors.blue('replace:'), gutil.colors.green(s));
             return s;
@@ -335,8 +337,8 @@ exports.parse =  function(options) {
                 var spath = path.join(options.base, p);
                 var info = buildInfo[fpath] || buildInfo[spath];                
                 //如果有md5则，合到路径中
-                if(info && info.md5) {
-                    s = s.replace(p, createMd5Path(p, info.md5, options.md5Separator || '.'));
+                if(info && info.path) {
+                    s = s.replace(p, path.dirname(p) + '/' + path.basename(info.path));
                 }
 
             gutil.log(gutil.colors.blue('css url:'), gutil.colors.green(s));
@@ -366,9 +368,6 @@ exports.md5 = function(opt) {
                     if (file.path[0] == '.') {
                       key = path.join(file.base, file.path);
                     }
-                    //var dir = path.dirname(key);
-                    //var ext = path.extname(key);
-                    //var basename = path.basename(key, ext);
                     //在文件名后缀前加上md5
                     file.path = createMd5Path(key, md5Hash, (opt.separator || '.'));//path.join(dir, basename + (opt.separator || '.') + md5Hash + ext);
 
@@ -413,6 +412,81 @@ function calcMd5(file, callback) {
   }
 }
 
+//给文件名加扩展
+exports.expandName = function(opt) {
+    opt = opt || {};
+    var stream = through.obj(function (file, enc, cb) {
+        if (!file) {
+            this.emit("error", new PluginError(pluginName, "files can not be empty"));
+            return cb();
+        }
+        else if (file.isNull()) {
+            return cb();
+        }
+        else {       
+            if(opt.expand) {
+                //在文件名加上扩展
+                var ext = path.extname(file.path);
+                var basename = path.basename(file.path, ext);
+                file.path = path.join(path.dirname(file.path), basename+opt.separator+opt.expand+ext).replace(/\\/g,'/');
+            }     
+            
+            this.push(file);
+            cb();                   
+        }
+    });
+    return stream;
+}
+
+//给文件更名，如果有md5则加上，或有扩展名，也加上
+exports.changeFileName = function(opt) {
+     opt = opt || {};
+    var stream = through.obj(function (file, enc, cb) {
+        if (!file) {
+            this.emit("error", new PluginError(pluginName, "files can not be empty"));
+            return cb();
+        }
+        else if (file.isNull()) {
+            return cb();
+        }
+        else {   
+            if(opt.md5) {         
+                calcMd5(file, function(md5Hash) {
+                    if(md5Hash) {
+                        var size = opt.size || 8;
+                        //截取指定长度的md5码
+                        if(size > 0 && size < md5Hash.length) md5Hash = md5Hash.slice(0, size);                        
+                    }
+                    var key = file.path;
+                    if (file.path[0] == '.') {
+                      key = path.join(file.base, file.path);
+                    }
+                    //在文件名后缀前加上md5
+                    file.path = createMd5Path(key, md5Hash, (opt.separator || '.'), opt.expand);
+
+                    //缓存当前md5信息
+                    var info = {
+                        "path": file.path,
+                        "md5": md5Hash
+                    };
+                    setCache(key, info);
+
+                    stream.push(file);
+                    cb();
+                });            
+            }
+            else {
+                if(opt.expand) {
+                    file.path = createMd5Path(file.path, '', (opt.separator || '.'), opt.expand);
+                }
+                stream.push(file);
+                cb();
+            }
+        }
+    });
+    return stream;
+}
+
 //获取当前流的路径
 //经过各插件处理后的路径
 function saveInfo(opt) {
@@ -425,18 +499,7 @@ function saveInfo(opt) {
         var info = {
             "path": key
         };
-        /*
-        //如果路径中有md5，则处理md5码，后截取路径
-        if(opt && opt.md5Separator) {
-            var li = key.lastIndexOf(opt.md5Separator);
-            if(li >= 0) {
-                var di = info.path.lastIndexOf('.');
-                if(di == -1) di = info.path.length;
-                var start = li + opt.md5Separator.length;
-                info.md5 = info.path.substring(start, di);
-                key = info.path.replace(opt.md5Separator + info.md5, '');
-            }
-        } */
+       
         setCache(key, info);
         callback(null, file);
       };
@@ -490,10 +553,12 @@ function getCache() {
 }
 
 //据md5生成路径
-function createMd5Path(oldpath, md5, md5Separator) {
+function createMd5Path(oldpath, md5, separator, expand) {
     var ext = path.extname(oldpath);
     var basename = path.basename(oldpath, ext);
-    return path.join(path.dirname(oldpath), basename+md5Separator+md5+ext).replace(/\\/g,'/');
+    if(expand) ext = separator + expand + ext;
+    if(md5) ext = separator + md5 + ext;
+    return path.join(path.dirname(oldpath), basename + ext).replace(/\\/g,'/');
 }
 
 //组合资源配置，返回组件的资源数组
@@ -695,12 +760,14 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
        stream = stream.pipe(rename(s.rename));
     }
 
-    if(!config.debug && s.md5) {
+    //给文件名加扩展
+    if(!config.debug && (s.md5 || s.expand)) {
         //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
         //所以其它地方引用，只能引用rename/concat之后的
         stream = stream.pipe(gulp.dest(dest));
-       stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
-   }
+        //加上md5或文件名扩展
+        stream = stream.pipe(exports.changeFileName({"separator": config.separator, 'size': config.md5Size, 'md5': s.md5, 'expand': s.expand}));
+    }
 
     if(endFun && typeof endFun == 'function') {
         stream = endFun(stream);
@@ -747,12 +814,15 @@ function runFileTaskStream(gulp, s, config, startFun, endFun) {
      if(s.rename)
         stream = stream.pipe(rename(s.rename));
 
-     if(!config.debug && s.md5) {
+     //给文件名加扩展
+    if(!config.debug && (s.md5 || s.expand)) {
         //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
         //所以其它地方引用，只能引用rename/concat之后的
         stream = stream.pipe(gulp.dest(dest));
-        stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
+        //加上md5或文件名扩展
+        stream = stream.pipe(exports.changeFileName({"separator": config.separator, 'size': config.md5Size, 'md5': s.md5, 'expand': s.expand}));
     }
+
      if(endFun && typeof endFun == 'function') {
         stream = endFun(stream);
      }
@@ -806,11 +876,13 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
      if(s.rename)
         stream = stream.pipe(rename(s.rename));
 
-     if(!config.debug && s.md5) {
+     //给文件名加扩展
+    if(!config.debug && (s.md5 || s.expand)) {
         //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
-        //所以其它地方引用，只能引用rename/concat之后的          
+        //所以其它地方引用，只能引用rename/concat之后的
         stream = stream.pipe(gulp.dest(dest));
-        stream = stream.pipe(exports.md5({"separator": config.md5Separator, 'size': config.md5Size}));
+        //加上md5或文件名扩展
+        stream = stream.pipe(exports.changeFileName({"separator": config.separator, 'size': config.md5Size, 'md5': s.md5, 'expand': s.expand}));
     }
 
     if(endFun && typeof endFun == 'function') {

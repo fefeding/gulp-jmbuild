@@ -40,7 +40,7 @@ var jmbuild = require('gulp-jmbuild');
 
 //配置文件
 var config = {
-    "debug": true, //如果为true,则表示debug模式，不会打md5和合并文件等操作，并启用文件监听
+    "debug": false,//如果是true,则不全合并和压缩文件，也不会打md5码,支持监听
     //项目根路径，后面的路径基本都是相对于它的。
     "root": path.resolve('../'),   
     //构建目标目录，相对于root
@@ -53,8 +53,8 @@ var config = {
     "cssDest": "static/css",
     //JS文件基础路径段，主要用于模块化提取模块id用处，比例在static/js/test/a.js  构建时就会取static/js后的test/a做为模块id
     "jsBase": "static/js",
-    //文件md5后缀的分隔符，例如：a.{md5}.js
-    "md5Separator": ".",
+    //文件后缀的分隔符，例如：a.{md5}.js
+    "separator": ".",
     //md5码取多少位，
     "md5Size": 8,
     //JS需要构建的配置
@@ -64,7 +64,9 @@ var config = {
             //以下所有类同
             "source": "static/js/*.js",
             //是否加上md5后缀,默认false
-            'md5': true
+            'md5': true,
+            //名称扩展，会直接加到文件名后缀前,例如：a.324242.lc.js
+            "expand": 'lc'
         },
         {
             "source": ["static/js/test/**/*.js"],

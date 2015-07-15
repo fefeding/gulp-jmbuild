@@ -29,7 +29,7 @@ var config = {
     //如果js文件配置中有配置base，则用文件配置中的base为准 
     "jsBase": "static/js",
     //文件md5后缀的分隔符，例如：a.{md5}.js
-    "md5Separator": ".",
+    "separator": ".",
     //md5码取多少位，
     "md5Size": 8,
     //JS需要构建的配置
@@ -39,7 +39,9 @@ var config = {
             //以下所有类同
             "source": "static/js/*.js",
             //是否加上md5后缀,默认false
-            'md5': true
+            'md5': true,
+            //名称扩展，会直接加到文件名后缀前,例如：a.324242.lc.js
+            "expand": 'lc'
         },
         {
             "source": ["static/js/test/**/*.js"],
