@@ -40,6 +40,7 @@ var jmbuild = require('gulp-jmbuild');
 
 //配置文件
 var config = {
+    "debug": true, //如果为true,则表示debug模式，不会打md5和合并文件等操作，并启用文件监听
     //项目根路径，后面的路径基本都是相对于它的。
     "root": path.resolve('../'),   
     //构建目标目录，相对于root
