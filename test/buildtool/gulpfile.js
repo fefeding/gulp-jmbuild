@@ -88,6 +88,11 @@ var config = {
     ]
 };
 
+//如果指定了debug参数
+if(Array.prototype.indexOf.call(process.argv, '-debug') > 0) {
+    config.debug = true;
+}
+
 //语法检测
 gulp.task('jshint', function () { 
     var sources = [];
