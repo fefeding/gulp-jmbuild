@@ -52,6 +52,10 @@ var config = {
             "dest": 'test',
             //这里要做用主要是会在模块id中加上test/**做为路径，并在debug时，单独文件构建会放到test/**下面，而不是合到t.js
             "base": 'static/js'
+            //部署相关配置，这里自定义属性，可在debug时用到，跟插件无关
+            //,
+            //"deployBase": 'xx.com/static/pc/syb_bbs/',
+            //'deployDest': '/data/web/xx.com/static/pc/syb_bbs'
         },
         {
             "source": "static/js/test2/**/*.js",           
@@ -189,24 +193,33 @@ if(config.debug) {
                 console.log(task);
                 //这里可以部署等操作，
                 /*
-                var req = request.post('http://at.qq.com/static/upload/receiver2.php', {
+                if(!source.deployDest) {
+                    console.log('无法部署当前文件，请确保已正确配置部署路径。');
+                    return false;
+                }
+                var deployName = path.basename(task.dest);
+                //如果存在部署基础路径，则截取后续
+                if(source.deployBase) {
+                    task.dest = task.dest.replace(/\\/g,'/');
+                    var index = task.dest.indexOf(source.deployBase);                    
+                    if(index >= 0) {
+                        deployName = task.dest.substring(index + source.deployBase.length);
+                    }
+                }
+                var to = source.deployDest + '/' + deployName;
+                
+                var req = request.post('http://xx.qq.com/static/upload/receiver.php', {
                     formData: {
-                        from: '/bbs_htdocs/syb_bbs/templates',
-                        to: '/data/home/user00/gqq/web/bbs_htdocs/syb_bbs/templates/forum.tpl',
-                        file: fs.createReadStream('E:/syb/trunk/web/bbs_htdocs/syb_bbs/templates/forum.tpl')
+                        to: to,
+                        file: fs.createReadStream(task.dest)
                       }
                 },function(err, rsp, body) {
                     if (err) {
                         console.log('Error!');
                       } else {
-                        console.log(body);
+                        console.log('send file success:' + to);
                       }
-                });
-                //var form = req.form();
-                //form.append('from', '/bbs_htdocs/syb_bbs/templates');
-                //form.append('to','/data/home/user00/gqq/web/bbs_htdocs/syb_bbs/');
-                //form.append('file', fs.createReadStream('E:/syb/trunk/web/bbs_htdocs/syb_bbs/templates/forum.tpl'),{filename: 'forum.tpl'});
-                return;*/
+                });   */             
             });
         });
     }); 

@@ -1,0 +1,2 @@
+gulp -debug
+pause
