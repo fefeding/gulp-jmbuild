@@ -69,7 +69,6 @@ var gulpconcat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var cssuglify = require('gulp-minify-css');
 var rename = require('gulp-rename');
-var Q = require('q');
 var PluginError = gutil.PluginError;
 var through = require("through2");
 var path = require("path");
@@ -146,21 +145,21 @@ function watchJSTask(gulp, s, config, callback, startFun, endFun) {
     gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
         console.log(evt);
         //如果已存在当前task，则直返回
-        var task = exports.taskMapping[evt.path];
-        
-        if(!task) {
-            task = exports.taskMapping[evt.path] = {};
+        //var task = exports.taskMapping[evt.path];
+        //用缓存，发现过一段时间task就不能跑了！！！
+        //if(!task) {
+        var task = exports.taskMapping[evt.path] = {};
             task.name = evt.path;
             task.path = evt.path;            
-            var jsDestPath = path.resolve(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
-            task.dest = path.join(jsDestPath, s.dest || '', path.basename(task.path));
+            task.destPath = path.resolve(config.root, config.dest || '', config.jsDest || '', s.dest || ''); //js目标构建目录
+            task.dest = path.join(task.destPath, path.basename(task.path));
             s.source = task.path;
             gulp.task(task.name, function(){
                 
                 return runJSTaskStream(gulp, s, config, startFun, endFun);
             });            
             gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create js task ' + task.name));
-        }
+        //}
         callback && callback(task, s, evt);
     });
 }
@@ -168,20 +167,21 @@ function watchJSTask(gulp, s, config, callback, startFun, endFun) {
 function watchFILETask(gulp, s, config, callback, startFun, endFun) {
     gulp.watch(s.source || s, {cwd:config.root, buffer: typeof s.buffer == 'undefined'?true:s.buffer}, function(evt) {
         //如果已存在当前task，则直返回
-        var task = exports.taskMapping[evt.path];
-        if(!task) {
-            task = exports.taskMapping[evt.path] = {};  
+        //var task = exports.taskMapping[evt.path];
+        //if(!task) {
+            //用缓存，发现过一段时间task就不能跑了！！！
+        var task = exports.taskMapping[evt.path] = {};  
             task.name = evt.path;
             task.path = evt.path;
-            var fileDestPath = path.resolve(config.root, config.dest || '', config.fileDest || ''); //file目标构建目录
-            task.dest = path.join(fileDestPath, s.dest || '', path.basename(task.path));
+            task.destPath = path.resolve(config.root, config.dest || '', config.fileDest || '', s.dest || ''); //file目标构建目录
+            task.dest = path.join(task.destPath, path.basename(task.path));
             s.source = task.path;
             gulp.task(task.name, function(){
                 
                 return runFileTaskStream(gulp, s, config,  startFun, endFun);
             });
             gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create file task ' + task.name));
-        }
+        //}
         callback && callback(task, s, evt);
     });
 }
@@ -190,21 +190,24 @@ function watchCSSTask(gulp, s, config, callback, startFun, endFun) {
     
     gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
         console.log(evt);
+
+        //用缓存，发现过一段时间task就不能跑了！！！
+
         //如果已存在当前task，则直返回
-        var task = exports.taskMapping[evt.path];
-        if(!task) {
-            task = exports.taskMapping[evt.path] = {};  
+        //var task = exports.taskMapping[evt.path];
+        //if(!task) {
+        var task = exports.taskMapping[evt.path] = {};  
             task.name = evt.path;
             task.path = evt.path;
-            var cssDestPath = path.resolve(config.root, config.dest || '', config.cssDest || ''); //css目标构建目录
-            task.dest = path.join(cssDestPath, s.dest || '', path.basename(task.path));
+            task.destPath = path.resolve(config.root, config.dest || '', config.cssDest || '', s.dest || ''); //css目标构建目录
+            task.dest = path.join(task.destPath, path.basename(task.path));
             s.source = task.path;
             gulp.task(task.name, function(){
                 
                 return runCSSTaskStream(gulp, s, config, startFun, endFun);
             });
             gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create css task ' + task.name));
-        }
+        //}
         callback && callback(task, s, evt);
     });
 }
@@ -213,20 +216,21 @@ function watchHTMLTask(gulp, s, config, callback, startFun, endFun) {
     gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
         console.log(evt);
         //如果已存在当前task，则直返回
-        var task = exports.taskMapping[evt.path];
-        if(!task) {
-            task = exports.taskMapping[evt.path] = {};  
+        //var task = exports.taskMapping[evt.path];
+        //if(!task) {
+            //用缓存，发现过一段时间task就不能跑了！！！
+        var task = {};  
             task.name = evt.path;
             task.path = evt.path;
-            var destPath = path.resolve(config.root, config.dest || '');
-            task.dest = path.join(destPath, config.htmlDest || '', s.dest || '', path.basename(task.path)); 
+            task.destPath = path.resolve(config.root, config.dest || '', config.htmlDest || '', s.dest || '');
+            task.dest = path.join(task.destPath, path.basename(task.path)); 
             s.source = task.path;
             gulp.task(task.name, function(){
 
                 return runHTMLTaskStream(gulp, s, config, startFun, endFun);
             });
             gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create html task ' + task.name));
-        }
+        //}
         callback && callback(task, s, evt);
     });
 }
@@ -256,13 +260,15 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
     var jsDestPath = path.resolve(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
     var dest = path.join(jsDestPath, s.dest || '');
     
-    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''})
-     .pipe(parse.parse({
+    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
+    if(!config.debug) {
+        stream = stream.pipe(parse.parse({
             "base": path.resolve(config.root,s.base || config.jsBase),
             "type": 'js',
             "debug": config.debug,
             "config": s
         }));
+    }
      if(startFun && typeof startFun == 'function') {
         stream = startFun(stream);
      }
