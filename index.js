@@ -140,15 +140,27 @@ exports.watch = function(gulp, config, callback, startFun, endFun) {
         }
     }    
 }
+
+//监控任务缓存
+function watchTaskCache(key, type, obj) {
+    return obj || null;//暂时不缓存, 因为使用缓存后，任务过一段时间就会失效！
+    type = type || 'default';
+    exports.taskMapping[type] = exports.taskMapping[type] || {};
+    if(obj) {
+        return exports.taskMapping['type'][key] = obj;
+    }
+    var task = exports.taskMapping['type'][key];
+    return task;
+}
+
 //监控JS文件
 function watchJSTask(gulp, s, config, callback, startFun, endFun) {
     gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
-        console.log(evt);
         //如果已存在当前task，则直返回
-        //var task = exports.taskMapping[evt.path];
+        var task = watchTaskCache(evt.path, 'js');
         //用缓存，发现过一段时间task就不能跑了！！！
-        //if(!task) {
-        var task = exports.taskMapping[evt.path] = {};
+        if(!task) {
+            task = watchTaskCache(evt.path, 'js', {});
             task.name = evt.path;
             task.path = evt.path;      
             task.destPath = path.resolve(config.root, config.dest || '', config.jsDest || '', s.dest || ''); //js目标构建目录
@@ -164,28 +176,34 @@ function watchJSTask(gulp, s, config, callback, startFun, endFun) {
                     }
                 }
             }
-            //把构建目标路径传给执行函数
-            s.__dest = task.destPath;
-            
-            task.dest = path.join(task.destPath, path.basename(task.path));
-            s.source = task.path;
-            gulp.task(task.name, function(){
-                
-                return runJSTaskStream(gulp, s, config, startFun, endFun);
-            });            
-            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create js task ' + task.name));
-        //}
+            task.dest = path.join(task.destPath, path.basename(task.path));   
+            //生成监听构建任务
+            _watchJSCreateTask(gulp, task, s, config, startFun, endFun);         
+        }
         callback && callback(task, s, evt);
     });
 }
+
+//创建监听JS文件任务
+function _watchJSCreateTask(gulp, task, s, config, startFun, endFun) {
+    //把构建目标路径传给执行函数
+    s.__dest = task.destPath;
+    s.source = task.path;
+    gulp.task(task.name, function(){
+        
+        return runJSTaskStream(gulp, s, config, startFun, endFun);
+    });            
+    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create js task ' + task.name));
+}
+
 //监控普通文件
 function watchFILETask(gulp, s, config, callback, startFun, endFun) {
     gulp.watch(s.source || s, {cwd:config.root, buffer: typeof s.buffer == 'undefined'?true:s.buffer}, function(evt) {
         //如果已存在当前task，则直返回
-        //var task = exports.taskMapping[evt.path];
-        //if(!task) {
+        var task = watchTaskCache(evt.path, 'file');
+        if(!task) {
             //用缓存，发现过一段时间task就不能跑了！！！
-        var task = exports.taskMapping[evt.path] = {};  
+            task = watchTaskCache(evt.path, 'file', {});
             task.name = evt.path;
             task.path = evt.path;
             task.destPath = path.resolve(config.root, config.dest || '', config.fileDest || '', s.dest || ''); //file目标构建目录
@@ -200,31 +218,33 @@ function watchFILETask(gulp, s, config, callback, startFun, endFun) {
                     }
                 }
             }
-            //把构建目标路径传给执行函数
-            s.__dest = task.destPath;
             task.dest = path.join(task.destPath, path.basename(task.path));
-            s.source = task.path;
-            gulp.task(task.name, function(){
-                
-                return runFileTaskStream(gulp, s, config,  startFun, endFun);
-            });
-            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create file task ' + task.name));
-        //}
+            //生成监听构建任务
+            _watchFILECreateTask(gulp, task, s, config, startFun, endFun);
+        }
         callback && callback(task, s, evt);
     });
 }
+
+//创建监听FILE文件任务
+function _watchFILECreateTask(gulp, task, s, config, startFun, endFun) {
+    //把构建目标路径传给执行函数
+    s.__dest = task.destPath;
+    s.source = task.path;
+    gulp.task(task.name, function(){                
+        return runFileTaskStream(gulp, s, config,  startFun, endFun);
+    });
+    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create file task ' + task.name));
+}
+
 //监控css文件
 function watchCSSTask(gulp, s, config, callback, startFun, endFun) {
     
-    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
-        console.log(evt);
-
-        //用缓存，发现过一段时间task就不能跑了！！！
-
+    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {  
         //如果已存在当前task，则直返回
-        //var task = exports.taskMapping[evt.path];
-        //if(!task) {
-        var task = exports.taskMapping[evt.path] = {};  
+        var task = watchTaskCache(evt.path, 'css');
+        if(!task) {
+            task = watchTaskCache(evt.path, 'css', {});
             task.name = evt.path;
             task.path = evt.path;
             task.destPath = path.resolve(config.root, config.dest || '', config.cssDest || '', s.dest || ''); //css目标构建目录
@@ -239,29 +259,33 @@ function watchCSSTask(gulp, s, config, callback, startFun, endFun) {
                     }
                 }
             }
-            //把构建目标路径传给执行函数
-            s.__dest = task.destPath;
-
             task.dest = path.join(task.destPath, path.basename(task.path));
-            s.source = task.path;
-            gulp.task(task.name, function(){
-                
-                return runCSSTaskStream(gulp, s, config, startFun, endFun);
-            });
-            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create css task ' + task.name));
-        //}
+            //生成监听构建任务
+            _watchCSSCreateTask(gulp, task, s, config, startFun, endFun);
+        }
         callback && callback(task, s, evt);
     });
 }
+
+//创建监听CSS文件任务
+function _watchCSSCreateTask(gulp, task, s, config, startFun, endFun) {
+    //把构建目标路径传给执行函数
+    s.__dest = task.destPath;
+    s.source = task.path;
+    gulp.task(task.name, function(){        
+        return runCSSTaskStream(gulp, s, config, startFun, endFun);
+    });
+    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create css task ' + task.name));
+}
+
 //监控html文件
 function watchHTMLTask(gulp, s, config, callback, startFun, endFun) {
-    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {
-        console.log(evt);
+    gulp.watch(s.source || s, {cwd:config.root}, function(evt) {        
         //如果已存在当前task，则直返回
-        //var task = exports.taskMapping[evt.path];
-        //if(!task) {
-            //用缓存，发现过一段时间task就不能跑了！！！
-        var task = {};  
+        var task = watchTaskCache(evt.path, 'html');
+        if(!task) {
+            task = watchTaskCache(evt.path, 'html', {});
+            //用缓存，发现过一段时间task就不能跑了！！！       
             task.name = evt.path;
             task.path = evt.path;
             task.destPath = path.resolve(config.root, config.dest || '', config.htmlDest || '', s.dest || '');
@@ -275,20 +299,24 @@ function watchHTMLTask(gulp, s, config, callback, startFun, endFun) {
                         task.destPath = path.join(task.destPath, path.dirname(task.path).substr(mindex + mdpath.length));
                     }
                 }
-            }
-            //把构建目标路径传给执行函数
-            s.__dest = task.destPath;
-
+            }            
             task.dest = path.join(task.destPath, path.basename(task.path)); 
-            s.source = task.path;
-            gulp.task(task.name, function(){
-
-                return runHTMLTaskStream(gulp, s, config, startFun, endFun);
-            });
-            gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create html task ' + task.name));
-        //}
+            //生成监听构建任务
+            _watchHTMLCreateTask(gulp, task, s, config, startFun, endFun);
+        }
         callback && callback(task, s, evt);
     });
+}
+
+//创建监听HTML文件任务
+function _watchHTMLCreateTask(gulp, task, s, config, startFun, endFun) {
+    //把构建目标路径传给执行函数
+    s.__dest = task.destPath;
+    s.source = task.path;
+    gulp.task(task.name, function(){
+        return runHTMLTaskStream(gulp, s, config, startFun, endFun);
+    });
+    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create html task ' + task.name));
 }
 
 //生成js编译任务
@@ -552,7 +580,8 @@ function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
             "cssDestPath": cssDestPath,
             "htmlDestPath": htmlDestPath,
             "fileDestPath": fileDestPath,
-            "config": s
+            "config": s,
+            "rootDest": config.dest
         })).pipe(gulp.dest(dest));
 
      if(s.rename) {
