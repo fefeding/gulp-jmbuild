@@ -186,17 +186,22 @@ $ gulp
 例如：
 ```html
 <link rel="stylesheet" href="__uri('static/css/style.css')" />	
+<link rel="stylesheet" href="static/css/style.css" />   
 <script src="__uri(static/js/a.js)"></script>
+<script src="static/js/a.js"></script>
 var a=__pkg('/static/js/a.js');
 var t=__pkg('test/t.js');
 ```
 构建后：
 ```html
 <link rel="stylesheet" href="static/css/style.95cc4059.css" />	
+<link rel="stylesheet" href="static/css/style.95cc4059.css" />  
+<script src="static/js/a.49ea7d65.js"></script>
 <script src="static/js/a.49ea7d65.js"></script>
 var a="/static/js/a.49ea7d65.js";
 var t="test/t.fbdd9f3d.js";
 ```
+__pkg和__uri的差别在于，__pkg替换后会带上双引号，适合用于js中。__uri直接替换不带引号，适合用在html中.
 
 **2.__inline函数**
 
@@ -206,6 +211,7 @@ var t="test/t.fbdd9f3d.js";
 
 例如：
 ```html
+<link rel="stylesheet" href="/static/css/style.css?__inline" /> 
 <style>
 	__inline('/static/css/style.css')
 </style>
