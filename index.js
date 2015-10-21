@@ -352,6 +352,9 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
         var dest = path.join(jsDestPath, s.dest || '');
     }
     var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
+    //初始化流源
+    //stream = stream.pipe(jmrename.initSource());
+
     if(!config.debug) {
         stream = stream.pipe(parse.parse({
             "base": path.resolve(config.root,s.base || config.jsBase),
@@ -392,6 +395,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
 
     return stream.pipe(gulp.dest(dest))
      .pipe(cache.saveInfo(config));
+     //.pipe(jmrename.endSource());
 }
 
 //普通文件任务
