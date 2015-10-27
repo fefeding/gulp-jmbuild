@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>demo</title>
 <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1.0, maximum-scale=1, user-scalable=no"/>
+
+
 <script>
 	function __cmdinline(){}
 	var __inline = __cmdinline;
@@ -13,26 +15,39 @@
 
 	var a=__pkg('/static/js/a.js');
 	var t=__pkg('test/t.js');
-</script>
-<style>
-	__inline('/static/css/style.css')
-</style>
-
-<link rel="stylesheet" href="__uri('static/css/style.css')" />	
-</head>
-<body>
-</body>
-<script src="http://gqq.gtimg.com/static/mobile/js/v3/pkg/sea.js"></script>
-<script src="__uri(static/js/a.js)"></script>
-<script>
 	
-var cssUrl = "__uri('static/css/style.css')";
-
+</script>
+<script src="http://gqq.gtimg.com/static/mobile/js/v3/pkg/sea.js"></script>
+<script>
 	seajs.config({
 	  base: "./static/js",
 	  alias: {
 	  }
 	});
+</script>
+<style>
+/*手动内联*/
+	__inline('/static/css/style.css')
+</style>
+<!--自动内联 -->
+<link rel="stylesheet" href="/static/css/style.css?__inline" />	
+<link rel="stylesheet" href="static/css/style.css" />	
+<link rel="stylesheet" href="__uri('static/css/style.css')" />	
+</head>
+<body>
+</body>
+
+
+<script src="static/js/n.js?__inline"></script>
+
+<script src="__uri(static/js/a.js)"></script>
+<script src="static/js/a.js"></script>
+
+<script>
+	
+var cssUrl = "__uri('static/css/style.css')";
+
+	
 	
 	__inline('test/t.js', 'a.js');
 	

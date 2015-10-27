@@ -9,8 +9,9 @@ var Stream = require('stream');
 
 var cssbase64 = require('gulp-base64');
 var runSequence = require('gulp-run-sequence');
+var sourcemaps = require('gulp-sourcemaps');
 
-var jmbuild = require('../../index.js');
+var jmbuild = require('../../index.js');//使用npm安装后请用: require('gulp-jmbuild');
 
 //配置文件
 var config = {
@@ -124,9 +125,9 @@ gulp.task('jshint', function () {
 
 //生成压缩JS任务
 var jstasks = jmbuild.jsTask(gulp, config, ['jshint'], function(stream){
-    return stream.pipe(startFun('js'));
+    return stream.pipe(sourcemaps.init());
 },function(stream){
-    return stream.pipe(startFun('js'));
+    return stream.pipe(sourcemaps.write('./'));
 });
 //创建任务，用于执行前面创建的任务
 gulp.task('build-js', jstasks,function (){
@@ -154,9 +155,9 @@ var csstasks = jmbuild.cssTask(gulp, config, ['build-file'], function(stream){
     //此处可以自定加使用一些gulp插件来预处理文件
     //比如cssbase64这个就是使用的gulp-base64来把css听图片换成base64串
     //return stream.pipe(cssbase64({extensions:['svg','png',/\.jpg#datauri$/i]}));
-    return stream;
+    return stream.pipe(sourcemaps.init());
 },function(stream){
-    return stream.pipe(startFun('css'));
+    return stream.pipe(sourcemaps.write('./'));
 });
 //构建css任务
 gulp.task('build-style', csstasks,function (){
@@ -184,9 +185,7 @@ var tasks = ['build-js','build-html'];
 //如果是debug模式，则启用监听
 if(config.debug) {
     //监听
-    console.log('watching ...');
-    gulp.task('watch', function () {
-        console.log('start watch');        
+    gulp.task('watch', tasks.slice(0), function () {        
         jmbuild.watch(gulp, config, function(task, source, evt){
             //执行文件改变后，重新构建
             runSequence(task.name, function(){
@@ -222,6 +221,11 @@ if(config.debug) {
                 });   */             
             });
         });
+
+        setTimeout(function(){
+           console.log('watching ...'); 
+        },100);
+        
     }); 
     tasks.push('watch');    
 }
@@ -234,7 +238,7 @@ gulp.task('default', tasks);
 function startFun(msg) {
     var stream = new Stream.Transform({objectMode: true});    
     stream._transform = function(file, unused, callback) {  
-        console.log("start Fun["+msg+"]:" + file.path);
+        //console.log("start Fun["+msg+"]:" + file.path);
         callback(null, file);
       };
     return stream;   
@@ -243,7 +247,7 @@ function startFun(msg) {
 function endFun(msg) {
     var stream = new Stream.Transform({objectMode: true});    
     stream._transform = function(file, unused, callback) {  
-        console.log("end Fun["+msg+"]:" + file.path);
+        //console.log("end Fun["+msg+"]:" + file.path);
         callback(null, file);
       };
     return stream;   

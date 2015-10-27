@@ -1,6 +1,6 @@
 {
   "name": "gulp-jmbuild",
-  "version": "1.1.42",
+  "version": "1.2.49",
   "description": "前端构建工具",
   "author": {
     "name": "jiamao",
@@ -48,6 +48,5 @@
     "tarball": ""
   },
   "directories": {},
-  "readme": "README.md",
-  "log": "支持?__inline内联标签(link/script)"
+  "log": "增加处理html中的img标签, 修改css中图片路径中有?的问题"
 }

@@ -348,7 +348,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
         var dest = s.__dest;
     }
     else {
-        var jsDestPath = path.resolve(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
+        var jsDestPath = path.join(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
         var dest = path.join(jsDestPath, s.dest || '');
     }
     var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
@@ -357,10 +357,11 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
 
     if(!config.debug) {
         stream = stream.pipe(parse.parse({
-            "base": path.resolve(config.root,s.base || config.jsBase),
+            "base": path.join(config.root,s.base || config.jsBase),
             "type": 'js',
             "debug": config.debug,
-            "config": s
+            "config": s,
+            "destPath": path.join(config.root, config.dest || '')
         }));
     }
      if(startFun && typeof startFun == 'function') {
@@ -503,7 +504,8 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
             "type": 'css',
             "dest": dest,
             "debug": config.debug,
-            "config": s
+            "config": s,
+            "destPath": path.resolve(config.root, config.dest || '')
         }));
     //只有在非debug下才进行压缩
      if(!config.debug) {
@@ -584,8 +586,7 @@ function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
             "cssDestPath": cssDestPath,
             "htmlDestPath": htmlDestPath,
             "fileDestPath": fileDestPath,
-            "config": s,
-            "rootDest": config.dest
+            "config": s
         })).pipe(gulp.dest(dest));
 
      if(s.rename) {
