@@ -167,7 +167,8 @@ function watchJSTask(gulp, s, config, callback, startFun, endFun) {
 
             //debug模式下，文件按原本的路径拷贝
             if(config.debug) {
-                var mdpath = path.join(config.jsDest, s.dest);                
+                task.path = task.path.replace(/\\/g,'/');
+                var mdpath = s.subPath || s.dest || '';             
                 if(mdpath) {
                     var mindex = task.path.indexOf(mdpath);
                     if(mindex >= 0) {
@@ -209,7 +210,8 @@ function watchFILETask(gulp, s, config, callback, startFun, endFun) {
             task.destPath = path.resolve(config.root, config.dest || '', config.fileDest || '', s.dest || ''); //file目标构建目录
             //debug模式下，文件按原本的路径拷贝
             if(config.debug) {
-                var mdpath = path.join(config.fileDest, s.dest);                
+                task.path = task.path.replace(/\\/g,'/');
+                var mdpath = s.subPath || s.dest || '';                   
                 if(mdpath) {
                     var mindex = task.path.indexOf(mdpath);
                     if(mindex >= 0) {
@@ -250,7 +252,8 @@ function watchCSSTask(gulp, s, config, callback, startFun, endFun) {
             task.destPath = path.resolve(config.root, config.dest || '', config.cssDest || '', s.dest || ''); //css目标构建目录
             //debug模式下，文件按原本的路径拷贝
             if(config.debug) {
-                var mdpath = path.join(config.cssDest, s.dest);                
+                task.path = task.path.replace(/\\/g,'/');
+                var mdpath = s.subPath || s.dest || '';                     
                 if(mdpath) {
                     var mindex = task.path.indexOf(mdpath);
                     if(mindex >= 0) {
@@ -291,7 +294,8 @@ function watchHTMLTask(gulp, s, config, callback, startFun, endFun) {
             task.destPath = path.resolve(config.root, config.dest || '', config.htmlDest || '', s.dest || '');
             //debug模式下，文件按原本的路径拷贝
             if(config.debug) {
-                var mdpath = path.join(config.htmlDest, s.dest);                
+                task.path = task.path.replace(/\\/g,'/');
+                var mdpath = s.subPath || s.dest || '';                    
                 if(mdpath) {
                     var mindex = task.path.indexOf(mdpath);
                     if(mindex >= 0) {
