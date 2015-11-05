@@ -1,6 +1,6 @@
 {
   "name": "gulp-jmbuild",
-  "version": "1.2.50",
+  "version": "1.2.51",
   "description": "前端构建工具",
   "author": {
     "name": "jiamao",
@@ -48,5 +48,5 @@
     "tarball": ""
   },
   "directories": {},
-  "log": "增加处理html中的img标签, 修改css中图片路径中有?的问题"
+  "log": "增加资源路径映射功能"
 }

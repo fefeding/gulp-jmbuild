@@ -377,8 +377,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
         stream = stream.pipe(uglify());
      }     
 
-     if(s.concat){
-        if(config.debug) stream = stream.pipe(gulp.dest(dest));
+     if(s.concat && !config.debug){
         stream = stream.pipe(gulpconcat(s.concat));
     }
     if(s.rename){
@@ -442,8 +441,7 @@ function runFileTaskStream(gulp, s, config, startFun, endFun) {
      if(startFun && typeof startFun == 'function') {
         stream = startFun(stream);
      }
-     if(s.concat) {
-        if(config.debug) stream = stream.pipe(gulp.dest(dest));
+     if(s.concat && !config.debug) {
         stream = stream.pipe(gulpconcat(s.concat));
     }
 
@@ -508,6 +506,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
             "type": 'css',
             "dest": dest,
             "debug": config.debug,
+            "urlMaps": config.urlMaps || [],
             "config": s,
             "destPath": path.resolve(config.root, config.dest || '')
         }));
@@ -516,8 +515,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
         stream = stream.pipe(cssuglify());
      }
 
-     if(s.concat){        
-        if(config.debug) stream = stream.pipe(gulp.dest(dest));
+     if(s.concat && !config.debug){   
         stream = stream.pipe(gulpconcat(s.concat));
     }
      if(s.rename)
@@ -590,6 +588,7 @@ function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
             "cssDestPath": cssDestPath,
             "htmlDestPath": htmlDestPath,
             "fileDestPath": fileDestPath,
+            "urlMaps": config.urlMaps || [],
             "config": s
         })).pipe(gulp.dest(dest));
 
