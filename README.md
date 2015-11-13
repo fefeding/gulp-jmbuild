@@ -2,7 +2,6 @@
 **gulp插件，用于WEB前端构建**
 
 [![npm version](https://badge.fury.io/js/gulp-jmbuild.svg)](http://badge.fury.io/js/gulp-jmbuild)
-[![Build Status](https://travis-ci.org/jiamao/gulp-jmbuild.svg?branch=master)](https://travis-ci.org/jiamao/jmbuild)
 
 ## 安装
 
