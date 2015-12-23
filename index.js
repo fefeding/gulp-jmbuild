@@ -79,6 +79,8 @@ var parse = require('./lib/parse');
 
 var pluginName = 'gulp-jmbuild';
 
+//cache
+exports.cache = cache;
 
 //组合资源配置，返回组件的资源数组
 exports.getSources = function(config) {
@@ -372,11 +374,6 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
         stream = startFun(stream);
      }
 
-     //只有在非debug下才进行压缩
-     if(!config.debug) {
-        stream = stream.pipe(uglify());
-     }     
-
      if(s.concat && !config.debug){
         stream = stream.pipe(gulpconcat(s.concat));
     }
@@ -384,11 +381,17 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
        stream = stream.pipe(rename(s.rename));
     }
 
+    //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
+    //所以其它地方引用，只能引用rename/concat之后的
+    stream = stream.pipe(gulp.dest(dest));
+
+    //只有在非debug下才进行压缩
+     if(!config.debug) {
+        stream = stream.pipe(uglify());
+     }     
+
     //给文件名加扩展
-    if(!config.debug && (s.md5 || s.expand)) {
-        //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
-        //所以其它地方引用，只能引用rename/concat之后的
-        stream = stream.pipe(gulp.dest(dest));
+    if(!config.debug && (s.md5 || s.expand)) {        
         //加上md5或文件名扩展
         stream = stream.pipe(jmrename.changeFileName({"separator": config.separator, 'size': config.md5Size, 'md5': s.md5, 'expand': s.expand}));
     }
@@ -510,6 +513,11 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
             "config": s,
             "destPath": path.resolve(config.root, config.dest || '')
         }));
+
+    //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
+    //所以其它地方引用，只能引用rename/concat之后的
+    stream = stream.pipe(gulp.dest(dest));
+    
     //只有在非debug下才进行压缩
      if(!config.debug) {
         stream = stream.pipe(cssuglify());
