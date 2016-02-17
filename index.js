@@ -196,7 +196,7 @@ function _watchJSCreateTask(gulp, task, s, config, startFun, endFun) {
         
         return runJSTaskStream(gulp, s, config, startFun, endFun);
     });            
-    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create js task ' + task.name));
+    //gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create js task ' + task.name));
 }
 
 //监控普通文件
@@ -238,7 +238,7 @@ function _watchFILECreateTask(gulp, task, s, config, startFun, endFun) {
     gulp.task(task.name, function(){                
         return runFileTaskStream(gulp, s, config,  startFun, endFun);
     });
-    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create file task ' + task.name));
+    //gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create file task ' + task.name));
 }
 
 //监控css文件
@@ -280,7 +280,7 @@ function _watchCSSCreateTask(gulp, task, s, config, startFun, endFun) {
     gulp.task(task.name, function(){        
         return runCSSTaskStream(gulp, s, config, startFun, endFun);
     });
-    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create css task ' + task.name));
+    //gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create css task ' + task.name));
 }
 
 //监控html文件
@@ -322,7 +322,7 @@ function _watchHTMLCreateTask(gulp, task, s, config, startFun, endFun) {
     gulp.task(task.name, function(){
         return runHTMLTaskStream(gulp, s, config, startFun, endFun);
     });
-    gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create html task ' + task.name));
+    //gutil.log(gutil.colors.cyan('[watch]:'), gutil.colors.green('create html task ' + task.name));
 }
 
 //生成js编译任务
@@ -512,16 +512,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
             "urlMaps": config.urlMaps || [],
             "config": s,
             "destPath": path.resolve(config.root, config.dest || '')
-        }));
-
-    //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
-    //所以其它地方引用，只能引用rename/concat之后的
-    stream = stream.pipe(gulp.dest(dest));
-    
-    //只有在非debug下才进行压缩
-     if(!config.debug) {
-        stream = stream.pipe(cssuglify());
-     }
+        }));    
 
      if(s.concat && !config.debug){   
         stream = stream.pipe(gulpconcat(s.concat));
@@ -529,11 +520,17 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
      if(s.rename)
         stream = stream.pipe(rename(s.rename));
 
+    //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
+    //所以其它地方引用，只能引用rename/concat之后的
+    stream = stream.pipe(gulp.dest(dest));
+    
+    //只有在非debug下才进行压缩
+    if(!config.debug) {
+        stream = stream.pipe(cssuglify());
+    }
+
      //给文件名加扩展
     if(!config.debug && (s.md5 || s.expand)) {
-        //把原文件拷贝一份,以备其它地方引用//不 能去掉，否则inline可能会出问题
-        //所以其它地方引用，只能引用rename/concat之后的
-        stream = stream.pipe(gulp.dest(dest));
         //加上md5或文件名扩展
         stream = stream.pipe(jmrename.changeFileName({"separator": config.separator, 'size': config.md5Size, 'md5': s.md5, 'expand': s.expand}));
     }
