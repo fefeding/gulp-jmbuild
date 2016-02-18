@@ -505,6 +505,10 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
     if(startFun && typeof startFun == 'function') {
         stream = startFun(stream);
      }
+
+     //为了修改stream中的filepath为发布路径，，以用计算相对路径
+    stream = stream.pipe(gulp.dest(dest));
+
     stream = stream.pipe(parse.parse({
             "type": 'css',
             "dest": dest,
@@ -583,6 +587,10 @@ function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
     if(startFun && typeof startFun == 'function') {
         stream = startFun(stream);
      }
+
+     //为了修改stream中的filepath为发布路径，，以用计算相对路径
+     stream = stream.pipe(gulp.dest(dest));
+
      stream = stream.pipe(parse.parse({
             "type": 'html',
             "debug": config.debug,
