@@ -67,7 +67,7 @@ var Stream = require('stream');
 var gutil = require("gulp-util");
 var gulpconcat = require('gulp-concat');
 var uglify = require('gulp-uglify');
-var cssuglify = require('gulp-minify-css');
+var cleanCSS = require('gulp-clean-css');
 var rename = require('gulp-rename');
 var PluginError = gutil.PluginError;
 var through = require("through2");
@@ -530,7 +530,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
     
     //只有在非debug下才进行压缩
     if(!config.debug) {
-        stream = stream.pipe(cssuglify());
+        stream = stream.pipe(cleanCSS());
     }
 
      //给文件名加扩展
