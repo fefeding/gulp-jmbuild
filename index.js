@@ -529,7 +529,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
     stream = stream.pipe(gulp.dest(dest));
     
     //只有在非debug下才进行压缩
-    if(!config.debug) {
+    if (!config.debug && config.cssMinify !== false) {
         stream = stream.pipe(cleanCSS());
     }
 
