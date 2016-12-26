@@ -367,6 +367,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
             "type": 'js',
             "debug": config.debug,
             "config": s,
+            "root": config.root,
             "destPath": path.join(config.root, config.dest || '')
         }));
     }
