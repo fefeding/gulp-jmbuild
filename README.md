@@ -30,7 +30,7 @@ $ npm install gulp-jmbuild
 
 ## 示例
 
-**在构建目录下创建 `gbulpfile.js`**
+**在构建目录下创建 `gulpfile.js`**
 
 ```js
 var jshint = require('gulp-jshint');
