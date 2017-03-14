@@ -388,7 +388,8 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
 
     //只有在非debug下才进行压缩
      if(!config.debug) {
-        stream = stream.pipe(uglify());
+        //uglify支持原配置参数，请参考:https://github.com/terinjokes/gulp-uglify#user-content-options
+        stream = stream.pipe(uglify(s.uglify||{}));
      }     
 
     //给文件名加扩展
