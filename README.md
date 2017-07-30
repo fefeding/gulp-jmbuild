@@ -217,6 +217,7 @@ __pkg和__uri的差别在于，__pkg替换后会带上双引号，适合用于js
 <style>
 	__inline('/static/css/style.css')
 </style>
+<script src="test/t.js?__inline">
 <script>
 __inline('test/t.js', 'a.js');
 </script>
