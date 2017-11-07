@@ -372,7 +372,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
         }));
     }
      if(startFun && typeof startFun == 'function') {
-        stream = startFun(stream);
+        stream = startFun(stream, s);
      }
 
      if(s.concat && !config.debug){
@@ -399,7 +399,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
     }
 
     if(endFun && typeof endFun == 'function') {
-        stream = endFun(stream);
+        stream = endFun(stream, s);
      }
 
     return stream.pipe(gulp.dest(dest))
@@ -444,8 +444,14 @@ function runFileTaskStream(gulp, s, config, startFun, endFun) {
     var stream = gulp.src(s.source || s, {cwd:config.root, buffer: typeof s.buffer == 'undefined'?true:s.buffer, base: s.base || ''});
      //.pipe(gulp.dest(dest));
      if(startFun && typeof startFun == 'function') {
-        stream = startFun(stream);
+        stream = startFun(stream, s);
      }
+
+     //如果有限制文件大小,单位KB
+     if(s.maxSize) {
+        stream = stream.pipe(checkFileSize(s));
+     }
+
      if(s.concat && !config.debug) {
         stream = stream.pipe(gulpconcat(s.concat));
     }
@@ -463,7 +469,7 @@ function runFileTaskStream(gulp, s, config, startFun, endFun) {
     }
 
      if(endFun && typeof endFun == 'function') {
-        stream = endFun(stream);
+        stream = endFun(stream, s);
      }
     return stream.pipe(gulp.dest(dest)).pipe(cache.saveInfo(config));
 }
@@ -505,7 +511,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
     var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
      //.pipe(gulp.dest(dest));
     if(startFun && typeof startFun == 'function') {
-        stream = startFun(stream);
+        stream = startFun(stream, s);
      }
 
      //为了修改stream中的filepath为发布路径，，以用计算相对路径
@@ -542,7 +548,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
     }
 
     if(endFun && typeof endFun == 'function') {
-        stream = endFun(stream);
+        stream = endFun(stream, s);
      }
 
     return stream.pipe(gulp.dest(dest))
@@ -587,7 +593,7 @@ function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
 
     var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
     if(startFun && typeof startFun == 'function') {
-        stream = startFun(stream);
+        stream = startFun(stream, s);
      }
 
      //为了修改stream中的filepath为发布路径，，以用计算相对路径
@@ -611,7 +617,26 @@ function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
         stream = stream.pipe(rename(s.rename));
      }
      if(endFun && typeof endFun == 'function') {
-        stream = endFun(stream);
+        stream = endFun(stream, s);
      }
      return stream.pipe(gulp.dest(dest));
+}
+
+//限制文件大小，如果文件过大，则报错
+function checkFileSize(opt) {    
+    var stream = through.obj(function (file, enc, cb) {
+        //有大小限制
+        if(opt && opt.maxSize > 0) {
+            console.log(file.contents.length)
+            var size = file.contents.length / 1024;//转为KB
+            if(size > opt.maxSize) {
+                gutil.log(gutil.colors.red('file size error:', '('+size.toFixed(2)+'KB)'+file.path));
+                this.emit("error", new PluginError('file size error', '文件大于' + opt.maxSize + 'KB '));
+            }
+            
+        }
+        this.push(file);
+        cb();
+    });
+    return stream;
 }

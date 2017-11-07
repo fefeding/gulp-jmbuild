@@ -33,6 +33,10 @@ var config = {
     "separator": ".",
     //md5码取多少位，
     "md5Size": 8,
+    //路径映射，如果配置了映射，构建时，会把配匹的url替换成target
+    "urlMaps": [
+        {match:/^\/mqq\/v3\//, target: "//qian-img.tenpay.com/mqq/v3/"}
+    ],
     //JS需要构建的配置
     "js": [
         {
@@ -86,9 +90,9 @@ var config = {
             "source": "static/img/*.*",
             "md5": true,
             "dest": "static/img",
+            "maxSize": 100,//限制文件大小，单位KB
             //false表示以流的方式处理，否则表示直接读取到contents中
-            //二级进制文件最好设为false
-            "buffer": false
+            "buffer": true
         }
     ]
 };
