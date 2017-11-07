@@ -627,7 +627,6 @@ function checkFileSize(opt) {
     var stream = through.obj(function (file, enc, cb) {
         //有大小限制
         if(opt && opt.maxSize > 0) {
-            console.log(file.contents.length)
             var size = file.contents.length / 1024;//转为KB
             if(size > opt.maxSize) {
                 gutil.log(gutil.colors.red('file size error:', '('+size.toFixed(2)+'KB)'+file.path));
