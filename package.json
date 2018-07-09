@@ -1,6 +1,6 @@
 ﻿{
   "name": "gulp-jmbuild",
-  "version": "1.2.78",
+  "version": "1.2.79",
   "description": "前端构建工具",
   "author": {
     "name": "jiamao",
@@ -48,5 +48,5 @@
     "tarball": ""
   },
   "directories": {},
-  "log": "增加资源路径映射功能"
+  "log": "提升构建性能"
 }

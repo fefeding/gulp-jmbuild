@@ -72,10 +72,11 @@ var rename = require('gulp-rename');
 var PluginError = gutil.PluginError;
 var through = require("through2");
 var path = require("path");
-
+var Q = require('q');
 var jmrename = require('./lib/rename');
 var cache = require('./lib/cache');
 var parse = require('./lib/parse');
+const gulp = require('gulp');
 
 var pluginName = 'gulp-jmbuild';
 
@@ -342,14 +343,13 @@ exports.createJSTask = function(gulp, config, depTasks, startFun, endFun) {
 
 //借用闭包，处理gulp的task中index
 function _createJSTask(gulp, name, config, depTasks, index, startFun, endFun) {
-    gulp.task(name, depTasks, function(){
+    gulp.task(name, depTasks, function(cb){
         var s = config.js[index];
-       return runJSTaskStream(gulp, s, config, startFun, endFun);
+       return runJSTaskStream(gulp, s, config, startFun, endFun, cb);
     });
 }
-
 //对js文件流进行处理
-function runJSTaskStream(gulp, s, config, startFun, endFun) {
+function runJSTaskStream(gulp, s, config, startFun, endFun, cb) {
     if(s.__dest) {
         var dest = s.__dest;
     }
@@ -365,6 +365,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
         stream = stream.pipe(parse.parse({
             "base": path.join(config.root,s.base || config.jsBase),
             "type": 'js',
+            "md5size": config.md5size,
             "debug": config.debug,
             "config": s,
             "root": config.root,
@@ -390,7 +391,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
      if(!config.debug) {
         //uglify支持原配置参数，请参考:https://github.com/terinjokes/gulp-uglify#user-content-options
         stream = stream.pipe(uglify(s.uglify||{}));
-     }     
+     }
 
     //给文件名加扩展
     if(!config.debug && (s.md5 || s.expand)) {        
