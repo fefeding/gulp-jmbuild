@@ -1,7 +1,7 @@
 
 console.log('start build');
 
-var jshint = require('gulp-jshint');
+//var jshint = require('gulp-jshint');
 var Q = require('q');
 var gulp = require('gulp');
 var path = require('path');
@@ -81,7 +81,7 @@ var config = {
         {
             "source": "index.html",
             //当有inline模块化js文件时，理否把它依赖的模块一同内嵌进来，默认为false
-            "includeModule": true
+            "includeModule": false
         }
     ],
     //普通文件构建，可以用于图片拷贝和打md5码
@@ -103,7 +103,7 @@ if(Array.prototype.indexOf.call(process.argv, '-debug') > 0) {
 }
 
 //语法检测
-gulp.task('jshint', function () { 
+/*gulp.task('jshint', function () { 
     var sources = [];
     if(config.js && config.js.length) {
         for(var i=0;i<config.js.length;i++) {
@@ -124,11 +124,11 @@ gulp.task('jshint', function () {
     return gulp.src(sources, {cwd:config.root})
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
-});
+});*/
 
 
 //生成压缩JS任务
-var jstasks = jmbuild.jsTask(gulp, config, ['jshint'], function(stream){
+var jstasks = jmbuild.jsTask(gulp, config, [], function(stream){
     return stream.pipe(sourcemaps.init());
 },function(stream){
     return stream.pipe(sourcemaps.write('./'));

@@ -72,11 +72,10 @@ var rename = require('gulp-rename');
 var PluginError = gutil.PluginError;
 var through = require("through2");
 var path = require("path");
-var Q = require('q');
+
 var jmrename = require('./lib/rename');
 var cache = require('./lib/cache');
 var parse = require('./lib/parse');
-const gulp = require('gulp');
 
 var pluginName = 'gulp-jmbuild';
 
@@ -343,13 +342,14 @@ exports.createJSTask = function(gulp, config, depTasks, startFun, endFun) {
 
 //借用闭包，处理gulp的task中index
 function _createJSTask(gulp, name, config, depTasks, index, startFun, endFun) {
-    gulp.task(name, depTasks, function(cb){
+    gulp.task(name, depTasks, function(){
         var s = config.js[index];
-       return runJSTaskStream(gulp, s, config, startFun, endFun, cb);
+       return runJSTaskStream(gulp, s, config, startFun, endFun);
     });
 }
+
 //对js文件流进行处理
-function runJSTaskStream(gulp, s, config, startFun, endFun, cb) {
+function runJSTaskStream(gulp, s, config, startFun, endFun) {
     if(s.__dest) {
         var dest = s.__dest;
     }
@@ -365,7 +365,6 @@ function runJSTaskStream(gulp, s, config, startFun, endFun, cb) {
         stream = stream.pipe(parse.parse({
             "base": path.join(config.root,s.base || config.jsBase),
             "type": 'js',
-            "md5size": config.md5size,
             "debug": config.debug,
             "config": s,
             "root": config.root,
@@ -391,7 +390,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun, cb) {
      if(!config.debug) {
         //uglify支持原配置参数，请参考:https://github.com/terinjokes/gulp-uglify#user-content-options
         stream = stream.pipe(uglify(s.uglify||{}));
-     }
+     }     
 
     //给文件名加扩展
     if(!config.debug && (s.md5 || s.expand)) {        
@@ -516,7 +515,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
      }
 
      //为了修改stream中的filepath为发布路径，，以用计算相对路径
-    stream = stream.pipe(gulp.dest(dest));
+    //stream = stream.pipe(gulp.dest(dest));
 
     stream = stream.pipe(parse.parse({
             "type": 'css',

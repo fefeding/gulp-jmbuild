@@ -1,1 +1,0 @@
-define("test/dir/d",["../../b"],function(i,n,t){var d=i("../../b");n.init=function(){d.init("d")}});
