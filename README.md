@@ -187,18 +187,14 @@ $ gulp
 当在html中使用__pkg('xxx')/__uri('XXX')时，构建时会被自动替换成对应文件路径，如果有配置md5会自动带上md5码(配置在config的配置中)。
 例如：
 ```html
-<link rel="stylesheet" href="__uri('static/css/style.css')" />	
-<link rel="stylesheet" href="static/css/style.css" />   
-<script src="__uri(static/js/a.js)"></script>
+<link rel="stylesheet" href="static/css/style.css" />  
 <script src="static/js/a.js"></script>
 var a=__pkg('/static/js/a.js');
 var t=__pkg('test/t.js');
 ```
 构建后：
 ```html
-<link rel="stylesheet" href="static/css/style.95cc4059.css" />	
-<link rel="stylesheet" href="static/css/style.95cc4059.css" />  
-<script src="static/js/a.49ea7d65.js"></script>
+<link rel="stylesheet" href="static/css/style.95cc4059.css" /> 
 <script src="static/js/a.49ea7d65.js"></script>
 var a="/static/js/a.49ea7d65.js";
 var t="test/t.fbdd9f3d.js";
@@ -220,6 +216,7 @@ __pkg和__uri的差别在于，__pkg替换后会带上双引号，适合用于js
 <script>
 __inline('test/t.js', 'a.js');
 </script>
+<script src="static/js/a.js?__inline"></script>
 ```
 构建后：
 ```html
@@ -234,6 +231,3 @@ define("test/dir/d",["../../b"],function(i,n,t){var d=i("../../b");n.init=functi
 </script>
 ```
 
-**3.css中的import语法**
-
-当构建css文件时，会把@import url("./base.css?__inline");指定的文件合并到当前css中。
