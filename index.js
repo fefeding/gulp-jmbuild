@@ -384,7 +384,9 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
      }
 
      if(s.concat && !config.debug){
-        stream = stream.pipe(gulpconcat(s.concat));
+        stream = stream.pipe(gulpconcat(s.concat, {
+            newline: s.newline||'\n'
+        }));
     }
     if(s.rename){
        stream = stream.pipe(rename(s.rename));
@@ -470,7 +472,9 @@ function runFileTaskStream(gulp, s, config, startFun, endFun) {
      }
 
      if(s.concat && !config.debug) {
-        stream = stream.pipe(gulpconcat(s.concat));
+        stream = stream.pipe(gulpconcat(s.concat, {
+            newline: s.newline||'\n'
+        }));
     }
 
      if(s.rename)
@@ -553,7 +557,9 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
         }));    
 
      if(s.concat && !config.debug){   
-        stream = stream.pipe(gulpconcat(s.concat));
+        stream = stream.pipe(gulpconcat(s.concat, {
+            newline: s.newline||'\n'
+        }));
     }
      if(s.rename)
         stream = stream.pipe(rename(s.rename));
