@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>demo</title>
 <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1.0, maximum-scale=1, user-scalable=no"/>
+
+
 <script>
 	function __cmdinline(){}
 	var __inline = __cmdinline;
@@ -11,30 +13,116 @@
 	var _getHost='';
 	function __getPath(){return '';}
 
-	var a="/static/js/a.js";
+	var a="/static/js/a.dfbaaea7.lc.js";
 	var t="test/t.js";
-</script>
-<style>
-	__inline('/static/css/style.css')
-</style>
-
-<link rel="stylesheet" href=""static/css/style.css"" />	
-</head>
-<body>
-</body>
-<script src="http://gqq.gtimg.com/static/mobile/js/v3/pkg/sea.js"></script>
-<script src=""static/js/a.js""></script>
-<script>
 	
-var cssUrl = ""static/css/style.css"";
-
+</script>
+<script src="http://gqq.gtimg.com/static/mobile/js/v3/pkg/sea.js"></script>
+<script>
 	seajs.config({
 	  base: "./static/js",
 	  alias: {
 	  }
 	});
+</script>
+<style>
+/*手动内联*/
 	
-	__inline('test/t.js', 'a.js');
+
+/*i am base.css*/
+html,body{
+	margin:0;
+	padding:0;
+}
+
+
+.skin-smzh .gb-cont-bg,.skin-50721 .gb-cont-bg{background:#4A688A url(../img/gico-l.png) no-repeat 50% 0;}
+.skin-smzh .gb-bbs-banner img,.skin-50721 .gb-bbs-banner img{display: none;}
+.skin-smzh .gb-footer,.skin-50721 .gb-footer{background: #192334;}
+.skin-smzh .gb-frs li,.skin-50721 .gb-frs li{color: #91969F;} 
+.skin-smzh .gb-frs li a,.skin-50721 .gb-frs li a{color: #91969F;}
+.skin-smzh .gb-frs ul,.skin-50721 .gb-frs ul{border-bottom-color: #2A394B;}
+.skin-smzh .gb-ad-b span,.skin-50721 .gb-ad-b span{border:5px solid #FFF;}
+.skin-smzh .gb-ad-b strong,.skin-50721 .gb-ad-b strong{color: #FFF;}
+.skin-smzh .gb-ad-b em,.skin-50721 .gb-ad-b em{color: #91969F;} 
+.skin-smzh .gb-text-c,.skin-50721 .gb-text-c{color: #66696E;}
+.skin-smzh .gb-footer-link,.skin-50721 .gb-footer-link,.skin-smzh .gb-footer-link a,.skin-50721 .gb-footer-link a{color: #91969F;} 
+.skin-smzh .gb-s-tips,.skin-50721 .gb-s-tips{color: #BED1E2;margin: 0;padding: 3px 0 0 15px;}
+.skin-smzh .gb-bbs-new,.skin-50721 .gb-bbs-new{margin-top: 0} 
+
+.gb-bbs-user-define{width: 500px;margin-left: -250px;top: 220px;}
+.adm-search table{margin: 0 auto;} 
+.gb-dialog-from{padding: 20px;}
+.gb-d-label{padding: 5px 0;}
+.gb-frm-tips{color: #999;}
+.gb-frm-pl{padding: 0 0 0 60px;}
+
+.grid-list-wrap .grid-list{width: 100%;}
+</style>
+<!--自动内联 -->
+<style>
+
+
+/*i am base.css*/
+html,body{
+	margin:0;
+	padding:0;
+}
+
+
+.skin-smzh .gb-cont-bg,.skin-50721 .gb-cont-bg{background:#4A688A url(../img/gico-l.png) no-repeat 50% 0;}
+.skin-smzh .gb-bbs-banner img,.skin-50721 .gb-bbs-banner img{display: none;}
+.skin-smzh .gb-footer,.skin-50721 .gb-footer{background: #192334;}
+.skin-smzh .gb-frs li,.skin-50721 .gb-frs li{color: #91969F;} 
+.skin-smzh .gb-frs li a,.skin-50721 .gb-frs li a{color: #91969F;}
+.skin-smzh .gb-frs ul,.skin-50721 .gb-frs ul{border-bottom-color: #2A394B;}
+.skin-smzh .gb-ad-b span,.skin-50721 .gb-ad-b span{border:5px solid #FFF;}
+.skin-smzh .gb-ad-b strong,.skin-50721 .gb-ad-b strong{color: #FFF;}
+.skin-smzh .gb-ad-b em,.skin-50721 .gb-ad-b em{color: #91969F;} 
+.skin-smzh .gb-text-c,.skin-50721 .gb-text-c{color: #66696E;}
+.skin-smzh .gb-footer-link,.skin-50721 .gb-footer-link,.skin-smzh .gb-footer-link a,.skin-50721 .gb-footer-link a{color: #91969F;} 
+.skin-smzh .gb-s-tips,.skin-50721 .gb-s-tips{color: #BED1E2;margin: 0;padding: 3px 0 0 15px;}
+.skin-smzh .gb-bbs-new,.skin-50721 .gb-bbs-new{margin-top: 0} 
+
+.gb-bbs-user-define{width: 500px;margin-left: -250px;top: 220px;}
+.adm-search table{margin: 0 auto;} 
+.gb-dialog-from{padding: 20px;}
+.gb-d-label{padding: 5px 0;}
+.gb-frm-tips{color: #999;}
+.gb-frm-pl{padding: 0 0 0 60px;}
+
+.grid-list-wrap .grid-list{width: 100%;}
+</style>	
+<link rel="stylesheet" href="static/css/style.css" />	
+<link rel="stylesheet" href="static/css/style.css" />	
+</head>
+<body>
+</body>
+
+
+<script type="text/javascript">
+define("n", [ "./a" ], function(require, exports, module) {
+    var a = require("./a");
+    exports.init = function() {
+        alert("n");
+    };
+});
+</script>
+
+<script src="static/js/a.dfbaaea7.lc.js"></script>
+<script src="static/js/a.dfbaaea7.lc.js"></script>
+
+<script>
+	
+var cssUrl = "static/css/style.css";
+
+	
+	
+	
+define("test/c",["../b"],function(n,i,t){var f=n("../b");i.init=function(){f.init("b")}}),define("b",["./a"],function(n,i,t){var f=n("./a");i.init=function(){f.run("b")}}),define("a",[],function(n,i,t){i.run=function(){alert("i am a")}});
+//# sourceMappingURL=a.dfbaaea7.lc.js.map
+
+
 	
 	seajs.use('test/c',function(p) {
 		p.init();

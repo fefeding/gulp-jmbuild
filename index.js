@@ -63,7 +63,6 @@
     ]
 };
  */
-var Stream = require('stream');
 var gutil = require("gulp-util");
 var gulpconcat = require('gulp-concat');
 var uglify = require('gulp-uglify');
@@ -342,10 +341,19 @@ exports.createJSTask = function(gulp, config, depTasks, startFun, endFun) {
 
 //借用闭包，处理gulp的task中index
 function _createJSTask(gulp, name, config, depTasks, index, startFun, endFun) {
-    gulp.task(name, depTasks, function(){
-        var s = config.js[index];
-       return runJSTaskStream(gulp, s, config, startFun, endFun);
-    });
+    // 如果是4.0，则采用并发任务
+    if(gulp.parallel) {
+        gulp.task(name, gulp.parallel(depTasks, function(){
+            var s = config.js[index];
+           return runJSTaskStream(gulp, s, config, startFun, endFun);
+        }));
+    }
+    else {
+        gulp.task(name, depTasks, function(){
+            var s = config.js[index];
+            return runJSTaskStream(gulp, s, config, startFun, endFun);
+        });
+    }
 }
 
 //对js文件流进行处理
@@ -425,10 +433,19 @@ exports.createFILETask = function(gulp, config, depTasks, startFun, endFun) {
 
 //借用闭包，处理gulp的task中index
 function _createFileTask(gulp, name, config, depTasks, index, startFun, endFun) {
-    gulp.task(name, depTasks, function(){
-        var s = config.files[index];
-       return runFileTaskStream(gulp, s, config, startFun, endFun);
-    });
+    // 如果是4.0，则采用并发任务
+    if(gulp.parallel) {
+        gulp.task(name, gulp.parallel(depTasks, function(){
+            var s = config.files[index];
+            return runFileTaskStream(gulp, s, config, startFun, endFun);
+        }));
+    }
+    else {
+        gulp.task(name, depTasks, function(){
+            var s = config.files[index];
+            return runFileTaskStream(gulp, s, config, startFun, endFun);
+        });
+    }
 }
 
 
@@ -492,10 +509,19 @@ exports.createCSSTask = function(gulp, config, depTasks, startFun, endFun) {
 
 //借用闭包，处理gulp的task中index
 function _createCSSTask(gulp, name, config, depTasks, index, startFun, endFun) {
-    gulp.task(name, depTasks, function(){
-        var s = config.css[index];
-       return runCSSTaskStream(gulp, s, config, startFun, endFun);
-    });
+    // 如果是4.0，则采用并发任务
+    if(gulp.parallel) {
+        gulp.task(name, gulp.parallel(depTasks, function(){
+            var s = config.css[index];
+            return runCSSTaskStream(gulp, s, config, startFun, endFun);
+        }));
+    }
+    else {
+        gulp.task(name, depTasks, function(){
+            var s = config.css[index];
+            return runCSSTaskStream(gulp, s, config, startFun, endFun);
+        });
+    }
 }
 
 //CSS文件流任务处理
@@ -570,10 +596,19 @@ exports.createHTMLTask = function(gulp, config, depTasks, startFun, endFun) {
 
 //借用闭包，处理gulp的task中index
 function _createHTMLTask(gulp, name, config, depTasks, index, startFun, endFun) {
-    gulp.task(name, depTasks, function(){
-        var s = config.html[index];
-       return runHTMLTaskStream(gulp, s, config, startFun, endFun);        
-    });
+    // 如果是4.0，则采用并发任务
+    if(gulp.parallel) {
+        gulp.task(name, gulp.parallel(depTasks, function(){
+            var s = config.html[index];
+            return runHTMLTaskStream(gulp, s, config, startFun, endFun);  
+        }));
+    }
+    else {
+        gulp.task(name, depTasks, function(){
+            var s = config.html[index];
+            return runHTMLTaskStream(gulp, s, config, startFun, endFun);        
+        });
+    }
 }
 
 //html文件流任务处理
