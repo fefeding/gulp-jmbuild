@@ -134,12 +134,12 @@ var jstasks = jmbuild.jsTask(gulp, config, [], function(stream){
     return stream.pipe(sourcemaps.write('./'));
 });
 //创建任务，用于执行前面创建的任务
-gulp.task('build-js', jstasks,function (){
+gulp.task('build-js', gulp.parallel(jstasks,function (){
     console.log('js-start');
     var deferred = Q.defer();
     deferred.resolve();
     return deferred.promise;
-});
+}));
 
 //一般文件处理
 var filetasks = jmbuild.fileTask(gulp, config, [], function(stream){
@@ -147,12 +147,12 @@ var filetasks = jmbuild.fileTask(gulp, config, [], function(stream){
 },function(stream){
     return stream.pipe(startFun('file'));
 });
-gulp.task('build-file', filetasks,function (){
+gulp.task('build-file', gulp.parallel(filetasks,function (){
     console.log('file-start');
     var deferred = Q.defer();
     deferred.resolve();
     return deferred.promise;
-});
+}));
 
 //压缩css,依赖file拷贝
 var csstasks = jmbuild.cssTask(gulp, config, ['build-file'], function(stream){ 
@@ -164,12 +164,12 @@ var csstasks = jmbuild.cssTask(gulp, config, ['build-file'], function(stream){
     return stream.pipe(sourcemaps.write('./'));
 });
 //构建css任务
-gulp.task('build-style', csstasks,function (){
+gulp.task('build-style', gulp.parallel(csstasks,function (){
     console.log('minifyCSS-start');
     var deferred = Q.defer();
     deferred.resolve();
     return deferred.promise;
-});
+}));
 
 
 
@@ -179,11 +179,11 @@ var htmlTasks = jmbuild.htmlTask(gulp, config, ['build-js', 'build-style'], func
 },function(stream){
     return stream.pipe(startFun('html'));
 });
-gulp.task('build-html', htmlTasks, function (){
+gulp.task('build-html', gulp.parallel(htmlTasks, function (){
     var deferred = Q.defer();
     deferred.resolve();
     return deferred.promise;
-});
+}));
 
 var tasks = ['build-js','build-html'];
 //如果是debug模式，则启用监听
@@ -234,7 +234,9 @@ if(config.debug) {
     tasks.push('watch');    
 }
 
-gulp.task('default', tasks);  
+gulp.task('default', gulp.parallel(tasks, (done)=>{
+    done();
+}));  
 
 
 //下面二个函数只是测试，你可以在里面做你想要的预处理或结束后处理事情
