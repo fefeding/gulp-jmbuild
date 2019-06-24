@@ -41,7 +41,7 @@
     "web前端"
   ],
   "scripts": {
-    "test": "make test"
+    "test": "cd ./test/buildtool & gulp & cd ../../"
   },
   "license": "MIT",
   "main": "index.js",
