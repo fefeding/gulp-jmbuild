@@ -371,7 +371,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
     //stream = stream.pipe(jmrename.initSource());
 
     if(s.es6) {
-        stream = stream.pipe(babel());
+        stream = stream.pipe(babel(config.babel||{}));
     }
 
     if(!config.debug) {
