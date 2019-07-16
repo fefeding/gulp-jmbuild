@@ -68,6 +68,7 @@ var gulpconcat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var cleanCSS = require('gulp-clean-css');
 var rename = require('gulp-rename');
+var babel = require('gulp-babel');
 var PluginError = gutil.PluginError;
 var through = require("through2");
 var path = require("path");
@@ -368,6 +369,10 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
     var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
     //初始化流源
     //stream = stream.pipe(jmrename.initSource());
+
+    if(s.es6) {
+        stream = stream.pipe(babel());
+    }
 
     if(!config.debug) {
         stream = stream.pipe(parse.parse({
