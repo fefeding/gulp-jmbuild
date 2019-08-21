@@ -37,6 +37,30 @@ var config = {
     "urlMaps": [
         {match:/^\/mqq\/v3\//, target: "//qian-img.tenpay.com/mqq/v3/"}
     ],
+    "babel": {
+        "sourceType": "unambiguous", //"script" | "module" | "unambiguous"
+        "presets": [
+            [
+                "@babel/env", {
+                    "modules": false // 这里不处理模块，就不会引入严格模式  'commonjs', 'amd', 'umd', 'systemjs' - 'auto' 
+                }
+            ]
+        ], // 转换es6 to es5
+        "plugins": [
+                ["@babel/plugin-transform-modules-umd", {
+                    "strict": false,
+                    "strictMode": false
+                }],
+                "@babel/plugin-proposal-class-properties",
+                /*["@babel/plugin-transform-modules-commonjs", {
+                    "strict": false
+                }], [
+                "@babel/plugin-transform-strict-mode", {
+                    "strictMode": false
+                }
+                ]*/
+            ]
+    },
     //JS需要构建的配置
     "js": [
         {
@@ -46,7 +70,8 @@ var config = {
             //是否加上md5后缀,默认false
             'md5': true,
             //名称扩展，会直接加到文件名后缀前,例如：a.324242.lc.js
-            "expand": 'lc'
+            "expand": 'lc',
+            "es6": true // 处理es6语法
         },
         {
             "source": ["static/js/test/**/*.js"],

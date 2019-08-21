@@ -1,0 +1,24 @@
+{
+    "sourceType": "unambiguous", //"script" | "module" | "unambiguous"
+    "presets": [
+        [
+            "@babel/env", {
+                "modules": false // 这里不处理模块，就不会引入严格模式  'commonjs', 'amd', 'umd', 'systemjs' - 'auto' 
+            }
+        ]
+    ], // 转换es6 to es5
+    "plugins": [
+            ["@babel/plugin-transform-modules-umd", {
+                "strict": false,
+                "strictMode": false
+            }],
+            "@babel/plugin-proposal-class-properties",
+            /*["@babel/plugin-transform-modules-commonjs", {
+                "strict": false
+            }], [
+            "@babel/plugin-transform-strict-mode", {
+                "strictMode": false
+            }
+            ]*/
+        ]
+}
