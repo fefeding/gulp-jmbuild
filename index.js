@@ -366,7 +366,7 @@ function runJSTaskStream(gulp, s, config, startFun, endFun) {
         var jsDestPath = path.join(config.root, config.dest || '', config.jsDest || ''); //js目标构建目录
         var dest = path.join(jsDestPath, s.dest || '');
     }
-    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
+    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || '', ignore: s.ignore||[]});
     //初始化流源
     //stream = stream.pipe(jmrename.initSource());
 
@@ -465,7 +465,7 @@ function runFileTaskStream(gulp, s, config, startFun, endFun) {
         var fileDestPath = path.resolve(config.root, config.dest || '', config.fileDest || ''); //file目标构建目录
         var dest = path.join(fileDestPath, s.dest || '');
     }
-    var stream = gulp.src(s.source || s, {cwd:config.root, buffer: typeof s.buffer == 'undefined'?true:s.buffer, base: s.base || ''});
+    var stream = gulp.src(s.source || s, {cwd:config.root, buffer: typeof s.buffer == 'undefined'?true:s.buffer, base: s.base || '', ignore: s.ignore||[]});
      //.pipe(gulp.dest(dest));
      if(startFun && typeof startFun == 'function') {
         stream = startFun(stream, s);
@@ -543,7 +543,7 @@ function runCSSTaskStream(gulp, s, config, startFun, endFun) {
         var dest = path.join(cssDestPath, s.dest || '');
     }
 
-    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
+    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || '', ignore: s.ignore||[]});
      //.pipe(gulp.dest(dest));
     if(startFun && typeof startFun == 'function') {
         stream = startFun(stream, s);
@@ -637,7 +637,7 @@ function runHTMLTaskStream(gulp, s, config, startFun, endFun) {
         var dest = path.resolve(destPath, config.htmlDest || '', s.dest || '');
     }
 
-    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || ''});
+    var stream = gulp.src(s.source || s, {cwd:config.root, base: s.base || '', ignore: s.ignore||[]});
     if(startFun && typeof startFun == 'function') {
         stream = startFun(stream, s);
      }
